@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const JobInProgress = () => {
   const address = "medipally";
@@ -181,9 +182,9 @@ const JobInProgress = () => {
                 ))}
               </div>
             </Form.Group>
-            <Button variant="primary" type="submit" className="w-100">
+            <Link to="/vendor/Job/Progress/reached"><Button variant="primary" type="submit" className="w-100">
               Verify OTP
-            </Button>
+            </Button></Link>
           </Form>
         </Modal.Body>
       </Modal>
