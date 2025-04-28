@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link } from 'react-router-dom';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 const JobInProgress = () => {
   const address = "medipally";
@@ -12,6 +12,33 @@ const JobInProgress = () => {
 
   // Example price
   const price = "$120.00";
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '']); // Array for OTP digits
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
+
+  const handleCloseModal = () => setShowModal(false);
+  const handleShowModal = () => setShowModal(true);
+
+  const handleOtpChange = (e, index) => {
+    const newOtp = [...otp];
+    newOtp[index] = e.target.value;
+    setOtp(newOtp);
+  };
+
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    const otpCode = otp.join('');
+    if (otpCode === '1234') {
+      setIsOtpVerified(true);
+      alert('OTP Verified. Job marked as Reached.');
+      // You can redirect or perform actions after OTP verification
+      setShowModal(false);
+    } else {
+      alert('Invalid OTP, please try again.');
+    }
+  };
 
   return (
     <div className="container my-4">
@@ -121,12 +148,45 @@ const JobInProgress = () => {
 
           {/* Action Button */}
           <div className="text-center">
-            <Link to="/vendor/Job/Progress/reached"><button className="btn btn-warning btn-lg">
+            <Button 
+              variant="warning" 
+              size="lg"
+              onClick={handleShowModal}
+            >
               Mark as Reached
-            </button></Link>
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Verify OTP</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleOtpSubmit}>
+            <Form.Group className="mb-3 text-center">
+              <div className="d-flex justify-content-center">
+                {otp.map((digit, index) => (
+                  <Form.Control 
+                    key={index}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(e, index)}
+                    className="otp-input mx-2 text-center"
+                    style={{ width: '50px', height: '50px', fontSize: '20px', textAlign: 'center' }}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+            <Button variant="primary" type="submit" className="w-100">
+              Verify OTP
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
