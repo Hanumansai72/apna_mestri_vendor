@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import "./Registration.css";
 
 function Registration() {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -40,137 +39,111 @@ function Registration() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const today = new Date();
-    const currentDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
-  
-    const finalData = {
-      ...formData,
-      registrationDate: currentDate,
-    };
-  
+    const currentDate = today.toISOString().split('T')[0];
+
+    const finalData = { ...formData, registrationDate: currentDate };
+
     await fetch('https://backend-d6mx.vercel.app/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(finalData),
     });
   };
-  
 
   return (
-    <div>
-      <div className="TOP-Container text-center my-4">
-        <h2 className="TOP-Heading">Register as a Service or Product Provider</h2>
-        <span className="Sub-Heading">Join our marketplace and start selling your products or services</span>
+    <div className="container my-5">
+      <div className="text-center mb-4">
+        <h2>Register as a Service or Product Provider</h2>
+        <p className="text-muted">Join our marketplace and start selling your products or services</p>
       </div>
 
-      <div className="form-section container">
-        <h2 className="form-title mb-4">Basic Information</h2>
+      <form className="card p-4 shadow" onSubmit={handleSubmit}>
+        <h4 className="mb-4">Basic Information</h4>
 
-        <div className="row mb-3">
+        <div className="row g-3">
           <div className="col-md-6">
-            <label>Full Name</label>
-            <input type="text" name="fullName" className="form-control" onChange={handleChange} />
+            <label htmlFor="fullName" className="form-label">Full Name</label>
+            <input type="text" className="form-control" id="fullName" name="fullName" onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label>Phone Number</label>
-            <input type="text" name="phoneNumber" className="form-control" onChange={handleChange} />
+            <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
+            <input type="text" className="form-control" id="phoneNumber" name="phoneNumber" onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="email" className="form-label">Email Address</label>
+            <input type="email" className="form-control" id="email" name="email" onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="businessName" className="form-label">Business Name</label>
+            <input type="text" className="form-control" id="businessName" name="businessName" onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="location" className="form-label">Location</label>
+            <input type="text" className="form-control" id="location" name="location" onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input type="password" className="form-control" id="password" name="password" onChange={handleChange} />
           </div>
         </div>
 
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label>Email Address</label>
-            <input type="email" name="email" className="form-control" onChange={handleChange} />
-          </div>
-          <div className="col-md-6">
-            <label>Business Name</label>
-            <input type="text" name="businessName" className="form-control" onChange={handleChange} />
-          </div>
-        </div>
-
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label>Location</label>
-            <input type="text" name="location" className="form-control" onChange={handleChange} />
-          </div>
-          <div className="col-md-6">
-            <label>Password</label>
-            <input type="password" name="password" className="form-control" onChange={handleChange} />
-          </div>
-        </div>
-
-        <h2 className="form-title mt-5 mb-3">Business Category</h2>
-        <div className="row mb-4">
-          {["Technical", "Non-Technical", "Products"].map((cat, idx) => (
-            <div className="col-md-4 mb-2" key={idx}>
+        <h4 className="mt-5 mb-4">Business Category</h4>
+        <div className="row g-3 text-center">
+          {["Technical", "Non-Technical", "Products"].map((category, idx) => (
+            <div className="col-md-4" key={idx}>
               <button
                 type="button"
-                className={`btn w-100 d-flex align-items-center justify-content-center gap-2 ${
-                  cat === "Technical" ? "btn-primary" : cat === "Non-Technical" ? "btn-success" : "btn-warning"
+                className={`btn w-100 ${
+                  category === "Technical" ? "btn-primary" : category === "Non-Technical" ? "btn-success" : "btn-warning"
                 }`}
-                onClick={() => handleCategoryClick(cat)}
+                onClick={() => handleCategoryClick(category)}
               >
-                <i className={`bi ${
-                  cat === "Technical" ? "bi-building" :
-                  cat === "Non-Technical" ? "bi-person-workspace" :
-                  "bi-box-seam"
-                }`}></i> {cat}
+                {category}
               </button>
             </div>
           ))}
         </div>
 
         {selectedCategory && (
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <label htmlFor="subCategory">Specialization</label>
-              <select
-                className="form-select"
-                name="subCategory"
-                id="subCategory"
-                onChange={handleChange}
-              >
-                <option value="">Select...</option>
-                {subCategories[selectedCategory].map((item, index) => (
-                  <option key={index} value={item}>{item}</option>
-                ))}
-              </select>
-            </div>
+          <div className="mt-4">
+            <label htmlFor="subCategory" className="form-label">Specialization</label>
+            <select
+              className="form-select"
+              id="subCategory"
+              name="subCategory"
+              onChange={handleChange}
+            >
+              <option value="">Select...</option>
+              {subCategories[selectedCategory].map((item, idx) => (
+                <option key={idx} value={item}>{item}</option>
+              ))}
+            </select>
           </div>
         )}
 
-        <div className="row mb-4">
-          <div className="col-md-6">
-            <label>Certificate Upload</label>
-            <div className="document12">
-              <div className="upload-container123">
-                <i className="bi bi-cloud-arrow-up upload-icon"></i>
-                <span className="text123">Drag and drop your images here or</span>
-                <input type="file" name="certificate" id="file" className="file-input" />
-                <label htmlFor="file" className="custom-file-label">Upload Document</label>
-              </div>
-            </div>
-          </div>
+        <h4 className="mt-5 mb-3">Certificate Upload</h4>
+        <div className="mb-4">
+          <label htmlFor="certificate" className="form-label">Upload your Certificate</label>
+          <input type="file" className="form-control" id="certificate" name="certificate" />
         </div>
 
-        <div className="Register-Button">
-          <button type="button" className="btn btn-primary btn-load" onClick={handleSubmit}>
-            Register Now <i className="bi bi-arrow-right right"></i>
+        <div className="d-grid mb-3">
+          <button type="submit" className="btn btn-primary">
+            Register Now <i className="bi bi-arrow-right"></i>
           </button>
-          <div className="Span-a">
-            <span>Already registered? <a href="/">Sign in</a></span>
-          </div>
         </div>
-      </div>
+
+        <div className="text-center">
+          <p>Already registered? <a href="/">Sign in</a></p>
+        </div>
+      </form>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import Product from './Componets/Vendor/product._vendor';
 import Registration from './Componets/Vendor/Registration';
 import TechnicalNonDashboard from './Componets/Vendor/Technical_Non_Dashboard';
 import VendorProfileSettings from './Componets/Vendor/vendor_profile_settings';
+import LoginPage from './Componets/login';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/vendor/Payment/sucess" element={<JobPaymentSummary></JobPaymentSummary>}/>
           <Route path="/vendor/Job/Progress" element={<JobInProgress></JobInProgress>}/>
           <Route path="/vendor/Job/history" element={<JobHistory></JobHistory>}/>
+          <Route path='/vendor/login' element={<LoginPage></LoginPage>}/>
 
           
 
