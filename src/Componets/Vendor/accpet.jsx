@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Pagination, Row, Col, Badge, Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'; // import navigate
+import { useNavigate } from 'react-router-dom';
 import Navbar from './navbar';
 
 const jobsData = [
@@ -18,31 +18,30 @@ const jobsData = [
   { id: 12, service: 'Pool Cleaning', customer: 'Isabella Taylor', location: 'New York, NY', date: 'May 5, 2025', time: '2:00 PM', duration: '2 hours', type: 'Water Cleaning', status: 'Completed' },
 ];
 
-
 const statusVariant = {
   Pending: 'secondary',
   Accepted: 'success',
   'In Progress': 'warning',
-  Completed: 'primary'
+  Completed: 'primary',
 };
 
 const actionButton = {
   Pending: { label: 'Accept Job', variant: 'warning' },
   Accepted: { label: 'Start Job', variant: 'primary' },
   'In Progress': { label: 'Complete Job', variant: 'success' },
-  Completed: { label: 'Invoice', variant: 'dark' }
+  Completed: { label: 'Invoice', variant: 'dark' },
 };
 
 const JobListings = () => {
+  const [jobs, setJobs] = useState(jobsData); // Use state for jobs data
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
-  const navigate = useNavigate(); // initialize navigate
-
+  const navigate = useNavigate();
   const jobsPerPage = 4;
 
-  const filteredJobs = jobsData.filter(job => {
+  const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -63,14 +62,33 @@ const JobListings = () => {
   };
 
   const handleApplyFilters = () => {
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
-  const handleActionClick = (status) => {
-    if (status === 'Pending' || status === 'Accepted') {
+  const handleActionClick = (jobId, currentStatus) => {
+    let updatedJobs = [...jobs];
+
+    // Update job status based on button click
+    if (currentStatus === 'Pending') {
+      updatedJobs = updatedJobs.map(job =>
+        job.id === jobId ? { ...job, status: 'Accepted' } : job
+      );
+    } else if (currentStatus === 'Accepted') {
+      updatedJobs = updatedJobs.map(job =>
+        job.id === jobId ? { ...job, status: 'In Progress' } : job
+      );
+    } else if (currentStatus === 'In Progress') {
+      updatedJobs = updatedJobs.map(job =>
+        job.id === jobId ? { ...job, status: 'Completed' } : job
+      );
+    }
+
+    // Update the state with the new jobs list
+    setJobs(updatedJobs);
+
+    if (currentStatus === 'Accepted') {
       navigate('/vendor/Job/Progress');
     }
-    // you can add more conditions for other buttons if needed
   };
 
   return (
@@ -78,7 +96,6 @@ const JobListings = () => {
       <Navbar />
 
       <div className="container my-4">
-
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h4>Job Listings</h4>
           <div>
@@ -89,8 +106,8 @@ const JobListings = () => {
 
         {/* Filters */}
         <div className="d-flex gap-2 mb-3">
-          <Form.Control 
-            placeholder="Search jobs by customer, location, or service type..." 
+          <Form.Control
+            placeholder="Search jobs by customer, location, or service type..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -137,9 +154,9 @@ const JobListings = () => {
                 <Col md={4} className="text-md-end mt-3 mt-md-0">
                   <Badge bg={statusVariant[job.status]} className="mb-3">{job.status}</Badge>
                   <div className="d-flex flex-wrap gap-2 justify-content-md-end">
-                    <Button 
+                    <Button
                       variant={actionButton[job.status].variant}
-                      onClick={() => handleActionClick(job.status)}
+                      onClick={() => handleActionClick(job.id, job.status)} // Use job status here
                     >
                       {actionButton[job.status].label}
                     </Button>
