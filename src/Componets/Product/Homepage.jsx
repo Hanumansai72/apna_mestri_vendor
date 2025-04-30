@@ -221,7 +221,7 @@ function Homepage() {
             </Card.Body>
           </Card>
         ))}
-      </div>
+      </div><br />
 
       <h3 className="Products-Heading">Products</h3>
 
