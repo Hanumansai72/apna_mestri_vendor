@@ -252,7 +252,7 @@ function Homepage() {
                         Get services on-the-go with our mobile app. Book services, track orders, and get <span className='Spna-class'>exclusive offers.</span>
                     </p>
                     <div className="download-buttons d-flex gap-3">
-                        <a href="#" className="btn store-btn apple d-flex align-items-center">
+                        <a href="/" className="btn store-btn apple d-flex align-items-center">
                             <i className="bi bi-apple me-2 fs-4"></i>
                             <div className="text-start">
                                 <small>Download on the</small>
@@ -260,7 +260,7 @@ function Homepage() {
                             </div>
                         </a>
 
-                        <a href="#" className="btn store-btn google d-flex align-items-center">
+                        <a href="/" className="btn store-btn google d-flex align-items-center">
                             <i className="bi bi-google-play me-2 fs-4"></i>
                             <div className="text-start">
                                 <small>Get it on</small>

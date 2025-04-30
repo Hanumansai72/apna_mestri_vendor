@@ -25,11 +25,11 @@ const Footer = () => {
           <div className="col-md-2">
             <h6 className="mb-3">Quick Links</h6>
             <ul className="list-unstyled small">
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Services</a></li>
-              <li><a href="#">Products</a></li>
-              <li><a href="#">Become a Vendor</a></li>
-              <li><a href="#">Careers</a></li>
+              <li><a href="/">About Us</a></li>
+              <li><a href="/">Services</a></li>
+              <li><a href="/">Products</a></li>
+              <li><a href="/">Become a Vendor</a></li>
+              <li><a href="/">Careers</a></li>
             </ul>
           </div>
 
@@ -37,11 +37,11 @@ const Footer = () => {
           <div className="col-md-3">
             <h6 className="mb-3">Support</h6>
             <ul className="list-unstyled small">
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">Safety Center</a></li>
-              <li><a href="#">Community Guidelines</a></li>
-              <li><a href="#">FAQs</a></li>
-              <li><a href="#">Contact Us</a></li>
+              <li><a href="/">Help Center</a></li>
+              <li><a href="/">Safety Center</a></li>
+              <li><a href="/">Community Guidelines</a></li>
+              <li><a href="/">FAQs</a></li>
+              <li><a href="/">Contact Us</a></li>
             </ul>
           </div>
 
@@ -49,11 +49,11 @@ const Footer = () => {
           <div className="col-md-3">
             <h6 className="mb-3">Legal</h6>
             <ul className="list-unstyled small">
-              <li><a href="#">Terms of Service</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Cookie Policy</a></li>
-              <li><a href="#">Accessibility</a></li>
-              <li><a href="#">Sitemap</a></li>
+              <li><a href="/">Terms of Service</a></li>
+              <li><a href="/">Privacy Policy</a></li>
+              <li><a href="/">Cookie Policy</a></li>
+              <li><a href="/">Accessibility</a></li>
+              <li><a href="/">Sitemap</a></li>
             </ul>
             <select className="form-select form-select-sm mt-2" style={{ width: 'auto' }}>
               <option>English</option>
