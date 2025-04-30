@@ -13,6 +13,8 @@ import Registration from './Componets/Vendor/Registration';
 import TechnicalNonDashboard from './Componets/Vendor/Technical_Non_Dashboard';
 import VendorProfileSettings from './Componets/Vendor/vendor_profile_settings';
 import LoginPage from './Componets/login';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import Homepage from './Componets/Product/Homepage';
 
 function App() {
   return (
@@ -21,7 +23,7 @@ function App() {
         <Routes>
           <Route path="/vendor" element={<TechnicalNonDashboard></TechnicalNonDashboard>} />
           <Route path="/Product" element={<Product></Product>} />
-          <Route path="/" element={<Registration></Registration>}/>
+          <Route path="/vendor/regsiter" element={<Registration></Registration>}/>
           <Route path="/vendor/user/profile" element={<VendorProfileSettings></VendorProfileSettings>}/>
           <Route path="/vendor/Job/Progress/reached" element={<JobProgress></JobProgress>}/>
           <Route path="/vendor/Jobs" element={<JobListings></JobListings>}/>
@@ -32,6 +34,8 @@ function App() {
           <Route path="/vendor/Job/Progress" element={<JobInProgress></JobInProgress>}/>
           <Route path="/vendor/Job/history" element={<JobHistory></JobHistory>}/>
           <Route path='/vendor/login' element={<LoginPage></LoginPage>}/>
+          <Route path='/' element={<Homepage></Homepage>}/>
+
 
           
 

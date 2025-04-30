@@ -1,0 +1,127 @@
+.Hero-Section {
+    width: 100%;
+    height: 450px;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent), #1e3a8a;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  .Hero-Section h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%; /* Full width */
+    font-size: 48px;
+    font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+    padding-top: 115px;
+    padding-left: 0; 
+    font-weight: 700;
+  }
+  .Hero-Section p{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+    width: 100%; 
+    font-size: 18px;
+
+
+
+  }
+  .Hero-Section-Dropdown{
+    background-color: white;
+    width: 700px;
+    height: 50px;
+    border: 1px solid transparent;
+    
+    border-radius: 6px;
+    padding-left: 0;
+    padding-top: 4px;
+    
+   
+  }
+  .Dropedown{
+    width: 300px;
+  }
+  .Input_bx{
+  position: relative;
+  bottom: 35%;
+  margin-bottom:110px;
+  width: 530px;
+  margin-left: 160px;
+
+  }
+  
+  
+  
+  .Technical-container .card {
+    flex: 1 1 calc(25% - 30px); 
+    max-width: 300px;
+    min-width: 220px;
+    box-sizing: border-box;
+  }
+  
+  .Techincal-Heading{
+    position: absolute;
+    top: 74%;
+    left: 2%;
+    padding-left: 5px;
+  }
+  .Non-Techincal-Heading,.Products-Heading{
+    padding-left: 20px;
+  }
+  
+  .Technical-scroll-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 20px;
+    gap: 20px;
+    margin-top: 80px;
+  }
+  .Non-Technical-scroll-wrapper{
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    margin-top:-20px;
+    padding-left: 20px; 
+    -ms-overflow-style: none; /* Hides the scrollbar in IE */
+  scrollbar-width: none; /* Hides the scrollbar in Firefox */
+ }
+  .Product-scroll-wrapper{
+
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    margin-top:-20px;
+    padding-left: 20px;
+    -ms-overflow-style: none; /* Hides the scrollbar in IE */
+  scrollbar-width: none; /* Hides the scrollbar in Firefox */
+  }
+  
+  .Technical-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .card {
+    flex: 0 0 auto;
+    width: 18rem;
+  }
+  
+  .scroll-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+  position: relative;
+  top: 240px;
+  z-index: 1;
+    
+  }
+  
+  .Techincal-Heading {
+    margin: 40px 20px 10px;
+  }
+  
