@@ -134,6 +134,24 @@ body {
     position: relative;
     margin-top: 40px;
   }
+  .trust-box {
+    background-color: rgba(255, 255, 255, 0.15); /* translucent white */
+    color:white;
+    padding: 15px 20px;
+    max-width: 500px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    backdrop-filter: blur(9px); /* frosted glass effect */
+    -webkit-backdrop-filter: blur(6px);
+    line-height: 1.5;
+    z-index: 10;
+    opacity: 10;
+    position: absolute;
+    top: 51%;
+    left: 3%;
+  }
+
   
   .divider::before,
   .divider::after {

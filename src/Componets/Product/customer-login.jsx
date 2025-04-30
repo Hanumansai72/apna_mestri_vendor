@@ -9,6 +9,12 @@ function Customerlogin() {
                     <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/a200b2ef9c-8078324fa5b90e3c1c7c.png" alt="" srcset="" />
                     <h2>Welcome to Apna Mestri</h2>
                     <span>Connect with skilled professionals or find new clients for your services.</span>
+                    <div className="trust-box">
+      <p>
+        Join thousands of users who trust <strong>Apna Mestri</strong> to find the best
+        construction professionals in their area.
+      </p>
+    </div>
                 </div>
                 <div className='Leftside-login'>
                 <div className="login-container">
