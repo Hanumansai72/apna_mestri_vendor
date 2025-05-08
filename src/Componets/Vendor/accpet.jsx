@@ -153,7 +153,7 @@ const JobListings = () => {
 
                 <Col md={4} className="text-md-end mt-3 mt-md-0">
                   <Badge bg={statusVariant[job.status]} className="mb-3">{job.status}</Badge>
-                  <div className="d-flex flex-wrap gap-2 justify-content-md-end">
+                  <div className="d-flex flex gap-2 justify-content-md-end">
                     <Button
                       variant={actionButton[job.status].variant}
                       onClick={() => handleActionClick(job.id, job.status)} // Use job status here

@@ -7,7 +7,7 @@ const JobInProgress = () => {
   const address = "medipally";
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
-  const currentStep = 2; // 1 = Accepted, 2 = En Route, 3 = Reached
+  const currentStep = 2; 
 
   const isStepActive = (step) => step <= currentStep;
 
@@ -85,7 +85,6 @@ const JobInProgress = () => {
             </div>
           </div>
 
-          {/* Map and Get Directions */}
           <div className="mb-4">
             <div className="position-relative">
               <img 

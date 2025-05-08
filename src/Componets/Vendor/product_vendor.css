@@ -91,16 +91,7 @@
     left:  17%;
   }
   
-  @media (max-width: 768px) {
-    .chart_header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
   
-    .chart_header .btn {
-      margin-top: 8px;
-    }
-  }
   .recent_orders_table_container {
     width: 100%;
     max-width: 1400px;
