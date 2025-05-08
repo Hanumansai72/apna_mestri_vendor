@@ -16,6 +16,7 @@ import LoginPage from './Componets/login';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Homepage from './Componets/Product/Homepage';
 import Customerlogin from './Componets/Product/customer-login';
+import ProductCategoryPage from './Componets/Product/AllVendor';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path='/vendor/login' element={<LoginPage></LoginPage>}/>
           <Route path='/' element={<Homepage></Homepage>}/>
           <Route path='/login' element={<Customerlogin></Customerlogin>}/>
+          <Route path='/product/Cement' element={<ProductCategoryPage></ProductCategoryPage>}/>
 
 
           
