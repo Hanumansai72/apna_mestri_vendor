@@ -14,6 +14,9 @@ import TechnicalNonDashboard from './Componets/Vendor/Technical_Non_Dashboard';
 import VendorProfileSettings from './Componets/Vendor/vendor_profile_settings';
 import LoginPage from './Componets/login';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import AddProductForm from './Componets/Vendor/addnewproduct';
+import BulkProductUpload from './Componets/Vendor/Bulkupload';
+import ProductList from './Componets/Vendor/viewproduct';
 
 function App() {
   return (
@@ -33,7 +36,13 @@ function App() {
           <Route path="/vendor/Job/Progress" element={<JobInProgress></JobInProgress>}/>
           <Route path="/vendor/Job/history" element={<JobHistory></JobHistory>}/>
           <Route path='/vendor/login' element={<LoginPage></LoginPage>}/>
-          
+          <Route path="/addproduct" element={<AddProductForm></AddProductForm>} />
+          <Route path="/addproduct/BulkUpload" element={<BulkProductUpload></BulkProductUpload>} />
+          <Route path="/ViewProduct" element={<ProductList></ProductList>} />
+
+
+
+
 
           
 
