@@ -1,22 +1,41 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("vendor");
   const navigate = useNavigate(); 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();
-    if (activeTab === "vendor") {
-      navigate("/vendor"); 
-    } else if (activeTab === "customer") {
-      navigate("/product"); 
-    }
+
+    const values = { username, password };
+
+    axios.post("https://backend-d6mx.vercel.app/postusername", values)
+      .then(res => {
+        console.log("Login response:", res.data);
+        if (res.data.message === "Success") {
+          alert("Login successfu")
+          if (activeTab === "vendor") {
+            navigate("/vendor/user/profile");
+          } else {
+
+            navigate("/product");
+          }
+        } else {
+          alert("Login failed. Please check credentials.");
+        }
+      })
+      .catch(err => {
+        console.error("Login error:", err);
+        alert("Server error during login.");
+      });
   };
 
   return (
     <div className="d-flex vh-100">
-      {/* Left: Login form */}
       <div className="w-50 d-flex flex-column justify-content-center align-items-center p-4">
         {/* Tabs */}
         <div className="d-flex mb-4">
@@ -42,16 +61,20 @@ export default function LoginPage() {
               <label className="form-label">Email Address</label>
               <input
                 type="email"
+                value={username}
                 className="form-control"
                 placeholder="you@example.com"
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="mb-3">
               <label className="form-label">Password</label>
               <input
                 type="password"
+                value={password}
                 className="form-control"
                 placeholder="********"
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -78,7 +101,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right: Illustration */}
       <div className="w-50 d-flex justify-content-center align-items-center bg-light">
         <div className="text-center" style={{ maxWidth: "400px" }}>
           <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c8dd26861f-39ad2f8afe79905fbe9e.png" alt="Illustration" className="img-fluid mb-4" />

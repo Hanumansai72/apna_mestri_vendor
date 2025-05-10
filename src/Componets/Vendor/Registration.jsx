@@ -3,38 +3,26 @@ import React, { useState } from 'react';
 function Registration() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [formData, setFormData] = useState({
-    fullName: "",
-    phoneNumber: "",
-    email: "",
-    businessName: "",
-    location: "",
-    password: "",
-    businessCategory: "",
-    subCategory: ""
+    Business_Name: "",
+    Owner_name: "",
+    Email_address: "",
+    Phone_number: "",
+    Business_address: "",
+    Category: "",
+    Sub_Category: "",
+    Tax_ID: "",
+    Password:""
   });
 
   const subCategories = {
-    "Technical": [
-      "Architects", "Civil Engineer", "Site Supervisor", "Survey Engineer", "MEP Consultant",
-      "Structural Engineer", "Project Manager", "HVAC Engineer", "Safety Engineer",
-      "Contractor", "Interior Designer", "WaterProofing Consultant", "Acoustic Consultants"
-    ],
-    "Non-Technical": [
-      "EarthWork Labour", "Civil Mason", "Shuttering/Centring Labour", "Plumber", "Electrician",
-      "Painter", "Carpenter", "Flooring Labour", "False Ceiling Worker"
-    ],
-    "Products": [
-      "Bricks / Block", "Cement / Adhesives", "Aggregate vendors", "Steel", "Stone / Tiles", "Paints",
-      "Electrical wires & fixtures", "Plumbing pipes & fixtures", "Civil products (All handy tools for civil works)",
-      "Glass", "Doors & Windows", "Wood and Hardware", "Fabricators", "Waterproofing products",
-      "Landscape products", "Lights", "Electrical", "Carpenter", "Flooring and Dado", "Wall papers",
-      "False Ceiling", "Glass work", "Cleaning products", "Furniture", "Blinds and Curtains", "Acoustics"
-    ]
+    "Technical": [ "Architects", "Civil Engineer", "Site Supervisor", "Survey Engineer", "MEP Consultant", "Structural Engineer", "Project Manager", "HVAC Engineer", "Safety Engineer", "Contractor", "Interior Designer", "WaterProofing Consultant", "Acoustic Consultants" ],
+    "Non-Technical": [ "EarthWork Labour", "Civil Mason", "Shuttering/Centring Labour", "Plumber", "Electrician", "Painter", "Carpenter", "Flooring Labour", "False Ceiling Worker" ],
+    "Products": [ "Bricks / Block", "Cement / Adhesives", "Aggregate vendors", "Steel", "Stone / Tiles", "Paints", "Electrical wires & fixtures", "Plumbing pipes & fixtures", "Civil products (All handy tools for civil works)", "Glass", "Doors & Windows", "Wood and Hardware", "Fabricators", "Waterproofing products", "Landscape products", "Lights", "Electrical", "Carpenter", "Flooring and Dado", "Wall papers", "False Ceiling", "Glass work", "Cleaning products", "Furniture", "Blinds and Curtains", "Acoustics" ]
   };
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    setFormData({ ...formData, businessCategory: category, subCategory: "" });
+    setFormData(prev => ({ ...prev, Category: category, Sub_Category: "" }));
   };
 
   const handleChange = (e) => {
@@ -45,52 +33,76 @@ function Registration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const today = new Date();
-    const currentDate = today.toISOString().split('T')[0];
+    try {
+      const res = await fetch('https://backend-d6mx.vercel.app/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    const finalData = { ...formData, registrationDate: currentDate };
+      if (res.ok) {
+        alert('Vendor registered successfully');
+        setFormData({
+          Business_Name: "",
+          Owner_name: "",
+          Email_address: "",
+          Phone_number: "",
+          Business_address: "",
+          Category: "",
+          Sub_Category: "",
+          Tax_ID: "",
+          Password:""
 
-    await fetch('https://backend-d6mx.vercel.app/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(finalData),
-    });
+        });
+        setSelectedCategory("");
+      } else {
+        alert('Registration failed');
+      }
+    } catch (err) {
+      console.error('Error submitting form:', err);
+    }
   };
 
   return (
     <div className="container my-5">
       <div className="text-center mb-4">
-        <h2>Register as a Service or Product Provider</h2>
-        <p className="text-muted">Join our marketplace and start selling your products or services</p>
+        <h2>Register as a Vendor</h2>
+        <p className="text-muted">Join our marketplace as a service or product provider</p>
       </div>
 
       <form className="card p-4 shadow" onSubmit={handleSubmit}>
-        <h4 className="mb-4">Basic Information</h4>
-
         <div className="row g-3">
           <div className="col-md-6">
-            <label htmlFor="fullName" className="form-label">Full Name</label>
-            <input type="text" className="form-control" id="fullName" name="fullName" onChange={handleChange} />
+            <label className="form-label">Business Name</label>
+            <input type="text" className="form-control" name="Business_Name" value={formData.Business_Name} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
-            <input type="text" className="form-control" id="phoneNumber" name="phoneNumber" onChange={handleChange} />
+            <label className="form-label">Owner Name</label>
+            <input type="text" className="form-control" name="Owner_name" value={formData.Owner_name} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label htmlFor="email" className="form-label">Email Address</label>
-            <input type="email" className="form-control" id="email" name="email" onChange={handleChange} />
+            <label className="form-label">Email Address</label>
+            <input type="email" className="form-control" name="Email_address" value={formData.Email_address} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label htmlFor="businessName" className="form-label">Business Name</label>
-            <input type="text" className="form-control" id="businessName" name="businessName" onChange={handleChange} />
+            <label className="form-label">Phone Number</label>
+            <input type="text" className="form-control" name="Phone_number" value={formData.Phone_number} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label htmlFor="location" className="form-label">Location</label>
-            <input type="text" className="form-control" id="location" name="location" onChange={handleChange} />
+            <label className="form-label">Business Address</label>
+            <input type="text" className="form-control" name="Business_address" value={formData.Business_address} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input type="password" className="form-control" id="password" name="password" onChange={handleChange} />
+            <label className="form-label">Tax ID</label>
+            <input type="text" className="form-control" name="Tax_ID" value={formData.Tax_ID} onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label className="form-label">Password</label>
+            <input type="text" className="form-control" name="Password" value={formData.Password} onChange={handleChange} />
+          </div>
+          <div className="col-md-6">
+            <label className="form-label">Re-type Password</label>
+            <input type="text" className="form-control" />
           </div>
         </div>
 
@@ -100,9 +112,7 @@ function Registration() {
             <div className="col-md-4" key={idx}>
               <button
                 type="button"
-                className={`btn w-100 ${
-                  category === "Technical" ? "btn-primary" : category === "Non-Technical" ? "btn-success" : "btn-warning"
-                }`}
+                className={`btn w-100 ${category === "Technical" ? "btn-primary" : category === "Non-Technical" ? "btn-success" : "btn-warning"}`}
                 onClick={() => handleCategoryClick(category)}
               >
                 {category}
@@ -113,13 +123,8 @@ function Registration() {
 
         {selectedCategory && (
           <div className="mt-4">
-            <label htmlFor="subCategory" className="form-label">Specialization</label>
-            <select
-              className="form-select"
-              id="subCategory"
-              name="subCategory"
-              onChange={handleChange}
-            >
+            <label className="form-label">Specialization</label>
+            <select className="form-select" name="Sub_Category" value={formData.Sub_Category} onChange={handleChange}>
               <option value="">Select...</option>
               {subCategories[selectedCategory].map((item, idx) => (
                 <option key={idx} value={item}>{item}</option>
@@ -128,20 +133,10 @@ function Registration() {
           </div>
         )}
 
-        <h4 className="mt-5 mb-3">Certificate Upload</h4>
-        <div className="mb-4">
-          <label htmlFor="certificate" className="form-label">Upload your Certificate</label>
-          <input type="file" className="form-control" id="certificate" name="certificate" />
-        </div>
-
-        <div className="d-grid mb-3">
+        <div className="d-grid mt-5 mb-3">
           <button type="submit" className="btn btn-primary">
-            Register Now <i className="bi bi-arrow-right"></i>
+            Register Now
           </button>
-        </div>
-
-        <div className="text-center">
-          <p>Already registered? <a href="/">Sign in</a></p>
         </div>
       </form>
     </div>

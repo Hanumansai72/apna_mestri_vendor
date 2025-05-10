@@ -71,3 +71,5 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 # My React App
 
 This project was bootstrapped with Create React App.
+Your local changes
+
