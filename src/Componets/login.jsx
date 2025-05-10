@@ -19,7 +19,7 @@ export default function LoginPage() {
         if (res.data.message === "Success") {
           alert("Login successfu")
           if (activeTab === "vendor") {
-            navigate("/vendor/user/profile");
+            navigate("/vendor");
           } else {
 
             navigate("/product");
