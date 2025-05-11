@@ -40,7 +40,6 @@ function App() {
         <Route path="/addproduct/:id" element={<AddProductForm />} />
         <Route path="/addproduct/:id/BulkUpload" element={<BulkProductUpload />} />
 
-        {/* Product Routes */}
         <Route path="/Product/:id" element={<Product />} />
         <Route path="/Product/:id/order" element={<NewHistory />} />
         <Route path="/Product/:id/order/history" element={<OrderHistory />} />

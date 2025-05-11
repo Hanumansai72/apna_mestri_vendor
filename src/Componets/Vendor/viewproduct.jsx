@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Button,
@@ -8,48 +9,40 @@ import {
   Badge,
   Modal,
 } from "react-bootstrap";
-import { FaEdit, FaEye } from "react-icons/fa";
-
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Wireless Bluetooth Headphones",
-    category: "Electronics",
-    subcategory: "Audio",
-    price: 89.99,
-    stock: 42,
-    views: 128,
-    availability: true,
-    status: "Available",
-  },
-  {
-    id: 2,
-    name: "Premium Cotton T-Shirt",
-    category: "Clothing",
-    subcategory: "Men's Wear",
-    price: 24.99,
-    stock: 5,
-    views: 87,
-    availability: true,
-    status: "Low Stock",
-  },
-  {
-    id: 3,
-    name: "Smart Home Speaker",
-    category: "Electronics",
-    subcategory: "Smart Home",
-    price: 129.99,
-    stock: 0,
-    views: 215,
-    availability: false,
-    status: "Out of Stock",
-  },
-];
+import { FaEdit } from "react-icons/fa";
 
 const ProductList = () => {
-  const [products, setProducts] = useState(sampleProducts);
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+
+  useEffect(() => {
+    const vendorId = localStorage.getItem("vendorId");
+
+    axios
+      .get(`https://backend-d6mx.vercel.app/viewproduct/${vendorId}`)
+      .then((res) => {
+        const mappedProducts = res.data.map((product) => ({
+          id: product._id,
+          name: product.ProductName,
+          price: parseFloat(product.ProductPrice),
+          stock: parseInt(product.ProductStock),
+          category: product.ProductCategory,
+          subcategory: product.ProductSubCategory,
+          availability: true,
+          status:
+            parseInt(product.ProductStock) === 0
+              ? "Out of Stock"
+              : parseInt(product.ProductStock) < 10
+              ? "Low Stock"
+              : "Available",
+        }));
+
+        setProducts(mappedProducts);
+      })
+      .catch((err) => console.error("Error fetching products:", err));
+  }, []);
 
   const handleToggle = (id) => {
     setProducts((prev) =>
@@ -81,14 +74,24 @@ const ProductList = () => {
     setEditProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Filter products by search term
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="container mt-4">
       <h3>Your Products</h3>
       <p>Manage and update your product listings.</p>
 
+      {/* Search and Filter Controls */}
       <Row className="mb-4">
         <Col md={4}>
-          <Form.Control placeholder="Search products..." />
+          <Form.Control
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </Col>
         <Col md={3}>
           <Form.Select>
@@ -115,7 +118,7 @@ const ProductList = () => {
 
       {/* Product Cards */}
       <Row>
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <Col md={4} className="mb-4" key={product.id}>
             <Card className="h-100 shadow-sm">
               <Card.Img
@@ -127,12 +130,11 @@ const ProductList = () => {
                 <Card.Title>{product.name}</Card.Title>
                 <h6>${product.price.toFixed(2)}</h6>
                 <p className="text-muted">
-                  {product.category} . {product.subcategory}
+                  {product.category} · {product.subcategory}
                 </p>
                 <p className="mb-1">
                   <strong>Stock:</strong> {product.stock}
                 </p>
-                
                 <Badge
                   bg={
                     product.status === "Available"
@@ -164,7 +166,7 @@ const ProductList = () => {
         ))}
       </Row>
 
-      {/* Pagination */}
+      {/* Pagination (Static Example) */}
       <div className="d-flex justify-content-end mt-4">
         <nav>
           <ul className="pagination">
@@ -181,6 +183,7 @@ const ProductList = () => {
         </nav>
       </div>
 
+      {/* Edit Modal */}
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Edit Product</Modal.Title>
