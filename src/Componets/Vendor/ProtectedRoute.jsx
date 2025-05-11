@@ -1,11 +1,28 @@
-// components/ProtectedRoute.jsx
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const navigate = useNavigate();
+  const { id } = useParams(); // get the :id from the URL
+  const [checking, setChecking] = useState(true);
+  const vendorId = localStorage.getItem("vendorId");
 
-  return isLoggedIn ? children : <Navigate to="/admin_login" replace />;
+  useEffect(() => {
+    if (!vendorId) {
+      navigate("/vendor/login");
+    }
+    else if (id && vendorId !== id) {
+      navigate("/vendor/login");
+    } else {
+      setChecking(false); 
+    }
+  }, [vendorId, id, navigate]);
+
+  if (checking) {
+    return <div>Loading...</div>; 
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

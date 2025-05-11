@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
@@ -7,43 +7,56 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [tech, setTech] = useState("");
+  const [vendorId, setVendorId] = useState("");
+
+  useEffect(() => {
+    if (!vendorId) return;
+
+    axios
+      .get(`https://backend-d6mx.vercel.app/api/categories/${vendorId}`)
+      .then((res) => {
+        console.log("Category Data:", res.data);
+        setTech(res.data.Category);
+      })
+      .catch((err) => {
+        console.error("Category fetch error:", err);
+      });
+  }, [vendorId]);
+
+  useEffect(() => {
+    if (!vendorId || !tech) return;
+
+    const techLower = tech.toLowerCase();
+
+    if (techLower === "technical" || techLower === "non-technical") {
+      navigate(`/vendor/${vendorId}`);
+    } else {
+      navigate(`/product/${vendorId}`);
+    }
+  }, [vendorId, tech, navigate]);
 
   const handleLogin = (event) => {
     event.preventDefault();
 
-    if (!username || !password) {
-      alert("Please fill in both email and password.");
-      return;
-    }
-
     const values = { username, password };
 
-    axios.post("https://backend-d6mx.vercel.app/postusername", values)
-      .then(res => {
+    axios
+      .post("https://backend-d6mx.vercel.app/postusername", values)
+      .then((res) => {
         console.log("Login response:", res.data);
 
         if (res.data.message === "Success") {
-          const vendorId = res.data.vendorId;
-
-          if (vendorId) {
-            localStorage.setItem("vendorId", vendorId); // store globally
-
-            alert("Login successful");
-
-            if (activeTab === "vendor") {
-              navigate(`/vendor/${vendorId}`);
-            } else {
-              navigate(`/product/${vendorId}`);
-            }
-          } else {
-            alert("Login failed: No vendor ID found.");
-          }
+          alert("Login successful");
+          const id = res.data.vendorId;
+          localStorage.setItem("vendorId", id);
+          setVendorId(id); // Triggers category fetch
         } else {
           alert("Login failed. Please check credentials.");
           navigate("/vendor/register");
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Login error:", err);
         alert("Server error during login.");
       });
@@ -111,11 +124,12 @@ export default function LoginPage() {
           </button>
 
           <p className="text-center mt-3 small">
-            Don't have an account? <a href="/" className="text-warning">Create Account</a>
+            Don't have an account? <a href="/vendor/register" className="text-warning">Create Account</a>
           </p>
         </div>
       </div>
 
+      {/* Right side illustration panel */}
       <div className="w-50 d-flex justify-content-center align-items-center bg-light">
         <div className="text-center" style={{ maxWidth: "400px" }}>
           <img

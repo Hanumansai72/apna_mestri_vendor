@@ -96,6 +96,7 @@ function Navbar({
                 </div>
             </nav>
 
+            {/* Bottom Navbar - Mobile Only */}
             <nav className="navbar navbar-light bg-light border-top d-flex d-lg-none fixed-bottom justify-content-around py-1">
                 <Link to={homeUrl} className="text-center text-decoration-none text-dark">
                     <i className="bi bi-house fs-5"></i><br />

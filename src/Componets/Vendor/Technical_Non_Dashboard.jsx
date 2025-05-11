@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Navbar from './navbar';
 import axios from 'axios';
 
 function TechnicalNonDashboard() {
+    const { id } = useParams(); 
+
     const [locationName, setLocationName] = useState("Fetching location...");
     const [distance, setDistance] = useState(null);
-
+    
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -22,9 +25,10 @@ function TechnicalNonDashboard() {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?city=${cityName}&state=Telangana&country=India&format=json&addressdetails=1`);
             const cityData = response.data[0];
             if (cityData) {
-                const lat = parseFloat(cityData.lat);
-                const lon = parseFloat(cityData.lon);
-                return { lat, lon };
+                return {
+                    lat: parseFloat(cityData.lat),
+                    lon: parseFloat(cityData.lon)
+                };
             }
         } catch (error) {
             console.error("Error getting coordinates:", error);
@@ -55,13 +59,14 @@ function TechnicalNonDashboard() {
         } else {
             setLocationName("Geolocation not supported");
         }
-    }, []);
+
+        console.log("Vendor ID:", id);
+    }, [id]);
 
     return (
         <div>
             <Navbar locationName={locationName} />
-            <h1 className="mt-4 mb-4 fw-bold text-primary text-center">Dashboard</h1>
-
+            <h1 className="mt-4 mb-4 fw-bold text-primary text-center">Vendor Dashboard (ID: {id})</h1>
 
             <div className="container mt-4">
                 <div className="row g-3">

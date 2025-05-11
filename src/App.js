@@ -18,6 +18,14 @@ import LoginPage from './Componets/login';
 import AddProductForm from './Componets/Vendor/addnewproduct';
 import BulkProductUpload from './Componets/Vendor/Bulkupload';
 import ProductList from './Componets/Vendor/viewproduct';
+import ProtectedRoute from './Componets/Vendor/ProtectedRoute';
+
+// Reusable Protected wrapper
+const Protected = ({ element }) => (
+  <ProtectedRoute>
+    {element}
+  </ProtectedRoute>
+);
 
 function App() {
   return (
@@ -27,22 +35,21 @@ function App() {
         <Route path="/vendor/login" element={<LoginPage />} />
         <Route path="/vendor/register" element={<Registration />} />
 
-        {/* Protected / Vendor Routes */}
-        <Route path="/vendor/:id" element={<TechnicalNonDashboard />} />
-        <Route path="/vendor/:id/profile" element={<VendorProfileSettings />} />
-        <Route path="/vendor/:id/Jobs" element={<JobListings />} />
-        <Route path="/vendor/:id/Job/history" element={<JobHistory />} />
-        <Route path="/vendor/:id/Job/Progress" element={<JobInProgress />} />
-        <Route path="/vendor/:id/Job/Progress/reached" element={<JobProgress />} />
-        <Route path="/vendor/:id/Payment" element={<OrderStatus />} />
-        <Route path="/vendor/:id/Payment/success" element={<JobPaymentSummary />} />
-        <Route path="/vendor/:id/ViewProduct" element={<ProductList />} />
-        <Route path="/addproduct/:id" element={<AddProductForm />} />
-        <Route path="/addproduct/:id/BulkUpload" element={<BulkProductUpload />} />
-
-        <Route path="/Product/:id" element={<Product />} />
-        <Route path="/Product/:id/order" element={<NewHistory />} />
-        <Route path="/Product/:id/order/history" element={<OrderHistory />} />
+        {/* Protected Routes */}
+        <Route path="/vendor/:id/" element={<Protected element={<TechnicalNonDashboard />} />} />
+        <Route path="/vendor/:id/settings" element={<Protected element={<VendorProfileSettings />} />} />
+        <Route path="/vendor/:id/Jobs" element={<Protected element={<JobListings />} />} />
+        <Route path="/vendor/:id/Job/history" element={<Protected element={<JobHistory />} />} />
+        <Route path="/vendor/:id/Job/Progress" element={<Protected element={<JobInProgress />} />} />
+        <Route path="/vendor/:id/Job/Progress/reached" element={<Protected element={<JobProgress />} />} />
+        <Route path="/vendor/:id/Payment" element={<Protected element={<OrderStatus />} />} />
+        <Route path="/vendor/:id/Payment/success" element={<Protected element={<JobPaymentSummary />} />} />
+        <Route path="/vendor/:id/ViewProduct" element={<Protected element={<ProductList />} />} />
+        <Route path="/addproduct/:id" element={<Protected element={<AddProductForm />} />} />
+        <Route path="/addproduct/:id/BulkUpload" element={<Protected element={<BulkProductUpload />} />} />
+        <Route path="/Product/:id" element={<Protected element={<Product />} />} />
+        <Route path="/Product/:id/order" element={<Protected element={<NewHistory />} />} />
+        <Route path="/Product/:id/order/history" element={<Protected element={<OrderHistory />} />} />
       </Routes>
     </Router>
   );

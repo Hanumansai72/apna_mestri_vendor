@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
-import { useNavigate} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+
 const AddProductForm = () => {
+  const { vendorId } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -16,7 +18,6 @@ const AddProductForm = () => {
     tags: "",
     description: "",
   });
-  const vendorId = localStorage.getItem("vendorId");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +30,7 @@ const AddProductForm = () => {
       console.log("Submitting:", formData);
 
       await axios.post("https://backend-d6mx.vercel.app/addproduct", {
-        Vendor:vendorId,
+        Vendor: vendorId,
         ProductName: formData.productName,
         ProductPrice: formData.price,
         ProductStock: formData.stock,
@@ -41,7 +42,7 @@ const AddProductForm = () => {
       });
 
       alert("Product submitted successfully!");
-      navigate("/Product");
+      navigate(`/vendor/${vendorId}/products`);
     } catch (error) {
       console.error("Error submitting product:", error);
       alert("Failed to submit product.");
@@ -52,13 +53,13 @@ const AddProductForm = () => {
     <div>
       <Navbar
         homeLabel="Home"
-        homeUrl="/Product"
+        homeUrl={`/Product/${vendorId}`}
         jobsLabel="Products"
-        jobsUrl="/Product/order"
+        jobsUrl={`/vendor/${vendorId}/products`}
         historyLabel="Orders History"
-        historyUrl="/Product/order/history"
+        historyUrl={`/vendor/${vendorId}/orders/history`}
         earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"
+        earningsUrl={`/vendor/${vendorId}/earnings`}
       />
 
       <div className="container mt-5">
@@ -67,7 +68,10 @@ const AddProductForm = () => {
             <button className="nav-link active">Single Product</button>
           </li>
           <li className="nav-item">
-            <button className="nav-link" onClick={() => navigate("/addproduct/BulkUpload")}>
+            <button
+              className="nav-link"
+              onClick={() => navigate(`/vendor/${vendorId}/addproduct/BulkUpload`)}
+            >
               Bulk Upload (CSV)
             </button>
           </li>
