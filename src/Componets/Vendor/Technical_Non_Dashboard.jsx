@@ -1,35 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './navbar';
 import axios from 'axios';
-import "./Techincal.css";
 
 function TechnicalNonDashboard() {
     const [locationName, setLocationName] = useState("Fetching location...");
-    const [distance, setDistance] = useState(null);  
+    const [distance, setDistance] = useState(null);
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; 
+        const R = 6371;
         const dLat = (lat2 - lat1) * (Math.PI / 180);
         const dLon = (lon2 - lon1) * (Math.PI / 180);
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c; 
-        return distance;
+        return R * c;
     }
 
     async function getCoordinatesFromCity(cityName) {
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?city=${cityName}&state=Telangana&country=India&format=json&addressdetails=1`);
             const cityData = response.data[0];
-            
             if (cityData) {
                 const lat = parseFloat(cityData.lat);
                 const lon = parseFloat(cityData.lon);
                 return { lat, lon };
-            } else {
-                throw new Error("City not found");
             }
         } catch (error) {
             console.error("Error getting coordinates:", error);
@@ -39,38 +34,24 @@ function TechnicalNonDashboard() {
 
     useEffect(() => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude } = position.coords;
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
 
-                    try {
-                        const res = await axios.get(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-                        );
-                        const name = res.data.address.city || res.data.address.town || res.data.address.village || "Your Area";
-                        setLocationName(name);
+                try {
+                    const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+                    const name = res.data.address.city || res.data.address.town || res.data.address.village || "Your Area";
+                    setLocationName(name);
 
-                        const destinationCity = "uppal";
-                        const destination = await getCoordinatesFromCity(destinationCity);
-
-                        if (destination) {
-                            const calculatedDistance = calculateDistance(latitude, longitude, destination.lat, destination.lon);
-                            setDistance(calculatedDistance);  
-                            console.log(`Distance from your location to ${destinationCity}: ${calculatedDistance.toFixed(2)} km`);
-                        } else {
-                            console.log("Couldn't retrieve destination coordinates.");
-                        }
-
-                    } catch (error) {
-                        console.error("Error fetching location name", error);
-                        setLocationName("Location unavailable");
+                    const destination = await getCoordinatesFromCity("uppal");
+                    if (destination) {
+                        const calculatedDistance = calculateDistance(latitude, longitude, destination.lat, destination.lon);
+                        setDistance(calculatedDistance);
                     }
-                },
-                (error) => {
-                    console.error("Location error:", error);
-                    setLocationName("Permission denied");
+                } catch (error) {
+                    console.error("Error fetching location name", error);
+                    setLocationName("Location unavailable");
                 }
-            );
+            }, () => setLocationName("Permission denied"));
         } else {
             setLocationName("Geolocation not supported");
         }
@@ -79,101 +60,91 @@ function TechnicalNonDashboard() {
     return (
         <div>
             <Navbar locationName={locationName} />
+            <h1 className="mt-4 mb-4 fw-bold text-primary text-center">Dashboard</h1>
 
-            <div className="cards-container">
-                <div className="cards">
-                    <span className='span-text'>New Jobs</span>
-                    <h3 className='short-text'>12</h3>
-                    <div className='i-name'>
-                        <i className="bi bi-briefcase-fill"></i>
-                    </div>
+
+            <div className="container mt-4">
+                <div className="row g-3">
+                    {[
+                        { title: "New Jobs", count: 12, icon: "bi-briefcase-fill" },
+                        { title: "Pending Jobs", count: 8, icon: "bi-clock-fill" },
+                        { title: "Completed Jobs", count: 30, icon: "bi-check-circle-fill" },
+                        { title: "Cancelled", count: 2, icon: "bi-x-circle-fill" },
+                    ].map((item, i) => (
+                        <div className="col-md-3" key={i}>
+                            <div className="card text-center shadow-sm">
+                                <div className="card-body">
+                                    <div className="text-muted">{item.title}</div>
+                                    <h3>{item.count}</h3>
+                                    <i className={`bi ${item.icon} fs-3`}></i>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
 
-                <div className="cards">
-                    <span className='span-text'>Pending Jobs</span>
-                    <h3 className='short-text'>8</h3>
-                    <div className='i-name'>
-                        <i className="bi bi-clock-fill clock"></i>
-                    </div>
-                </div>
-
-                <div className="cards">
-                    <span className='span-text'>Completed Jobs</span>
-                    <h3 className='short-text'>30</h3>
-                    <div className='i-name'>
-                        <i className="bi bi-check-circle-fill"></i>
-                    </div>
-                </div>
-
-                <div className="cards">
-                    <span className='span-text'>Cancelled</span>
-                    <h3 className='short-text'>2</h3>
-                    <div className='i-name'>
-                        <i className="bi bi-x-circle-fill"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div className='Upcoming_job'>
-                <h2 className='Job_Headings'>Upcoming Jobs</h2>
-
+                <h2 className="mt-5 mb-3">Upcoming Jobs</h2>
                 {[...Array(3)].map((_, index) => (
-                    <div className="card_jobs" key={index}>
-                        <div className="badge text-dark">Electrical</div>
-                        <div className="badge text-bg-warning text-dark">Today 10:00 AM</div>
-                        <h4 className='Job_Title'>Electrical Panel Upgrade</h4>
-                        <span className='Job_location'>{locationName} - Distance: {distance ? `${distance.toFixed(2)} km` : "Calculating..."}</span>
-                        <label>Customer Name: Rajesh</label>
-                        <span className='Job_Money'>Estimated Reward: ₹150–300</span>
-                        <button type="button" className="btn btn-secondary">View Job</button>
-                        <button type="button" className="btn btn-primary">Start Job</button>
+                    <div className="card mb-3 shadow-sm" key={index}>
+                        <div className="card-body">
+                            <div className="d-flex justify-content-between mb-2">
+                                <span className="badge text-bg-secondary">Electrical</span>
+                                <span className="badge text-bg-warning text-dark">Today 10:00 AM</span>
+                            </div>
+                            <h5>Electrical Panel Upgrade</h5>
+                            <p className="text-muted mb-1">
+                                {locationName} – Distance: {distance ? `${distance.toFixed(2)} km` : "Calculating..."}
+                            </p>
+                            <p className="mb-1">Customer Name: Rajesh</p>
+                            <p className="fw-bold">Estimated Reward: ₹150–300</p>
+                            <div className="d-flex gap-2">
+                                <button className="btn btn-secondary">View Job</button>
+                                <button className="btn btn-primary">Start Job</button>
+                            </div>
+                        </div>
                     </div>
                 ))}
 
-                <div className="perfomance_continer">
-                    <h4 className='perfomance_heading'>Performance Tracker</h4>
-                    <div className='perfomance_cards'>
-                        <div className="perfomance_card1">
-                            <span className='Perfomance_money'>₹3,000</span>
-                            <label>Total Rewards Earned</label>
-                        </div>
-                        <div className="perfomance_card1">
-                            <span className='Perfomance_money'>₹300</span>
-                            <label>Bonus Earned</label>
-                        </div>
-                        <div className="perfomance_card1">
-                            <span className='Perfomance_money'><i className="bi bi-star-fill"></i> 3.0/5.0</span>
-                            <label>Rating</label>
-                        </div>
+                <div className="mt-5">
+                    <h4>Performance Tracker</h4>
+                    <div className="row g-3">
+                        {[
+                            { label: "Total Rewards Earned", value: "₹3,000" },
+                            { label: "Bonus Earned", value: "₹300" },
+                            { label: "Rating", value: <><i className="bi bi-star-fill text-warning"></i> 3.0/5.0</> }
+                        ].map((item, i) => (
+                            <div className="col-md-4" key={i}>
+                                <div className="card text-center shadow-sm">
+                                    <div className="card-body">
+                                        <h4 className="mb-1">{item.value}</h4>
+                                        <small className="text-muted">{item.label}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    <div className="customer_review">
-                        <h4 className="customer_heading">Customer Reviews</h4>
-
-                        <div className="customer_cards">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Customer" className='Customer_image' />
-                            <div className="star-rating">
-                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
-                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
-                                <span className='Customer_days'>2 days ago</span>
+                    <h4 className="mt-4">Customer Reviews</h4>
+                    {[...Array(2)].map((_, i) => (
+                        <div className="card mb-3 shadow-sm" key={i}>
+                            <div className="card-body">
+                                <div className="d-flex align-items-center mb-2">
+                                    <img src="https://randomuser.me/api/portraits/women/32.jpg" className="rounded-circle me-3" width="50" height="50" alt="Customer" />
+                                    <div>
+                                        {[...Array(4)].map((_, i) => (
+                                            <i key={i} className="bi bi-star-fill text-warning"></i>
+                                        ))}
+                                        <small className="text-muted ms-2">2 days ago</small>
+                                    </div>
+                                </div>
+                                <p className="mb-0">
+                                    {i === 0
+                                        ? "The service was quick and professional — highly satisfied with the electrician's work!"
+                                        : "I was genuinely impressed with the technician’s punctuality and professionalism. He not only fixed the issue quickly but also explained everything clearly — highly recommended!"}
+                                </p>
                             </div>
-                            <label className='Customer_text'>
-                                "The service was quick and professional — highly satisfied with the electrician's work!"
-                            </label>
                         </div>
-
-                        <div className="customer_cards">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Customer" className='Customer_image' />
-                            <div className="star-rating">
-                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
-                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
-                                <span className='Customer_days'>2 days ago</span>
-                            </div>
-                            <label className='Customer_text'>
-                                "I was genuinely impressed with the technician’s punctuality and professionalism. He not only fixed the issue quickly but also explained everything clearly — highly recommended!"
-                            </label>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

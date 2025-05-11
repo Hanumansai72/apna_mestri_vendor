@@ -1,38 +1,55 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 const AddProductForm = () => {
+  const navigate = useNavigate();
+  const { vendorId } = useParams(); // vendorId must be in the URL
+
   const [formData, setFormData] = useState({
     productName: "",
     category: "",
     subCategory: "",
-    price: 0,
-    stock: 0,
+    price: "",
+    stock: "",
     location: "",
     tags: "",
     description: "",
-    images: [],
-    featured: false
   });
 
-  const navigate = useNavigate();
-
   const handleInputChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
-    if (type === "checkbox") {
-      setFormData({ ...formData, [name]: checked });
-    } else if (type === "file") {
-      setFormData({ ...formData, images: files });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    setFormData({ ...formData, [name]: newValue });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    try {
+      console.log("Submitting:", formData);
+
+      await axios.post("https://backend-d6mx.vercel.app/addproduct",{ vendor: vendorId,
+        ProductName: formData.productName,
+        ProductPrice: formData.price,
+        ProductStock: formData.stock,
+        ProductDescripition: formData.description,
+        ProductTags: formData.tags,
+        ProductCategory: formData.category,
+        ProductSubCategory: formData.subCategory,
+        ProductLocation: formData.location,
+        ProductIsAvaiable: formData.isAvailable,
+        ProductImageUrl: "" // optional
+      });
+
+      alert("Product submitted successfully!");
+      console.log(vendorId);
+      navigate("/Product");
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      alert("Failed to submit product.");
+    }
   };
 
   return (
@@ -56,7 +73,7 @@ const AddProductForm = () => {
             </button>
           </li>
           <li className="nav-item">
-            <button className="nav-link" onClick={() => navigate("/addproduct/BulkUpload")}> 
+            <button className="nav-link" onClick={() => navigate("/addproduct/BulkUpload")}>
               Bulk Upload (CSV)
             </button>
           </li>
@@ -71,6 +88,7 @@ const AddProductForm = () => {
                 type="text"
                 className="form-control"
                 name="productName"
+                value={formData.productName}
                 onChange={handleInputChange}
                 required
               />
@@ -81,6 +99,7 @@ const AddProductForm = () => {
               <select
                 className="form-select"
                 name="category"
+                value={formData.category}
                 onChange={handleInputChange}
                 required
               >
@@ -95,6 +114,7 @@ const AddProductForm = () => {
               <select
                 className="form-select"
                 name="subCategory"
+                value={formData.subCategory}
                 onChange={handleInputChange}
                 required
               >
@@ -110,6 +130,7 @@ const AddProductForm = () => {
                 type="number"
                 className="form-control"
                 name="price"
+                value={formData.price}
                 onChange={handleInputChange}
                 required
               />
@@ -121,6 +142,7 @@ const AddProductForm = () => {
                 type="number"
                 className="form-control"
                 name="stock"
+                value={formData.stock}
                 onChange={handleInputChange}
                 required
               />
@@ -132,6 +154,7 @@ const AddProductForm = () => {
                 type="text"
                 className="form-control"
                 name="location"
+                value={formData.location}
                 onChange={handleInputChange}
               />
             </div>
@@ -142,23 +165,9 @@ const AddProductForm = () => {
                 type="text"
                 className="form-control"
                 name="tags"
+                value={formData.tags}
                 onChange={handleInputChange}
               />
-            </div>
-
-            <div className="col-md-12 mb-3">
-              <label>Product Images *</label>
-              <input
-                type="file"
-                className="form-control"
-                name="images"
-                multiple
-                accept=".jpg,.jpeg,.png"
-                onChange={handleInputChange}
-              />
-              <small className="form-text text-muted">
-                PNG, JPG up to 5MB (Max 5 images)
-              </small>
             </div>
 
             <div className="col-md-12 mb-3">
@@ -167,12 +176,10 @@ const AddProductForm = () => {
                 className="form-control"
                 name="description"
                 rows="4"
+                value={formData.description}
                 onChange={handleInputChange}
                 required
               />
-              <small className="form-text text-muted">
-                Minimum 100 characters recommended
-              </small>
             </div>
 
             <div className="form-check mb-3">
@@ -180,6 +187,7 @@ const AddProductForm = () => {
                 className="form-check-input"
                 type="checkbox"
                 name="featured"
+                checked={formData.featured}
                 onChange={handleInputChange}
               />
               <label className="form-check-label">

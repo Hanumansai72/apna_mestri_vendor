@@ -4,28 +4,43 @@ import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("vendor");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();
 
+    if (!username || !password) {
+      alert("Please fill in both email and password.");
+      return;
+    }
+
     const values = { username, password };
 
     axios.post("https://backend-d6mx.vercel.app/postusername", values)
       .then(res => {
         console.log("Login response:", res.data);
-        if (res.data.message === "Success") {
-          alert("Login successfu")
-          if (activeTab === "vendor") {
-            navigate("/vendor");
-          } else {
 
-            navigate("/product");
+        if (res.data.message === "Success") {
+          const vendorId = res.data.vendorId;
+
+          if (vendorId) {
+            localStorage.setItem("vendorId", vendorId); // store globally
+
+            alert("Login successful");
+
+            if (activeTab === "vendor") {
+              navigate(`/vendor/${vendorId}`);
+            } else {
+              navigate(`/product/${vendorId}`);
+            }
+          } else {
+            alert("Login failed: No vendor ID found.");
           }
         } else {
           alert("Login failed. Please check credentials.");
+          navigate("/vendor/register");
         }
       })
       .catch(err => {
@@ -103,7 +118,11 @@ export default function LoginPage() {
 
       <div className="w-50 d-flex justify-content-center align-items-center bg-light">
         <div className="text-center" style={{ maxWidth: "400px" }}>
-          <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c8dd26861f-39ad2f8afe79905fbe9e.png" alt="Illustration" className="img-fluid mb-4" />
+          <img
+            src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c8dd26861f-39ad2f8afe79905fbe9e.png"
+            alt="Illustration"
+            className="img-fluid mb-4"
+          />
           <h3 className="fw-bold mb-2">Grow Your Business</h3>
           <p className="text-muted">
             Join thousands of vendors who’ve increased their sales and expanded their customer base.

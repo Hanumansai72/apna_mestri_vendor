@@ -33,7 +33,7 @@ const actionButton = {
 };
 
 const JobListings = () => {
-  const [jobs, setJobs] = useState(jobsData); // Use state for jobs data
+  const [jobs, setJobs] = useState(jobsData);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -68,7 +68,6 @@ const JobListings = () => {
   const handleActionClick = (jobId, currentStatus) => {
     let updatedJobs = [...jobs];
 
-    // Update job status based on button click
     if (currentStatus === 'Pending') {
       updatedJobs = updatedJobs.map(job =>
         job.id === jobId ? { ...job, status: 'Accepted' } : job
@@ -77,18 +76,14 @@ const JobListings = () => {
       updatedJobs = updatedJobs.map(job =>
         job.id === jobId ? { ...job, status: 'In Progress' } : job
       );
+      navigate(`/vendor/${jobId}/Job/Progress`);
     } else if (currentStatus === 'In Progress') {
       updatedJobs = updatedJobs.map(job =>
         job.id === jobId ? { ...job, status: 'Completed' } : job
       );
     }
 
-    // Update the state with the new jobs list
     setJobs(updatedJobs);
-
-    if (currentStatus === 'Accepted') {
-      navigate('/vendor/Job/Progress');
-    }
   };
 
   return (
@@ -104,7 +99,6 @@ const JobListings = () => {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="d-flex gap-2 mb-3">
           <Form.Control
             placeholder="Search jobs by customer, location, or service type..."
@@ -156,7 +150,7 @@ const JobListings = () => {
                   <div className="d-flex flex gap-2 justify-content-md-end">
                     <Button
                       variant={actionButton[job.status].variant}
-                      onClick={() => handleActionClick(job.id, job.status)} // Use job status here
+                      onClick={() => handleActionClick(job.id, job.status)}
                     >
                       {actionButton[job.status].label}
                     </Button>
