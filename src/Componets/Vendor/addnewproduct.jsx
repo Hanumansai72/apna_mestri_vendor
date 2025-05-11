@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import axios from "axios";
-
 const AddProductForm = () => {
   const navigate = useNavigate();
-  const { vendorId } = useParams(); // vendorId must be in the URL
 
   const [formData, setFormData] = useState({
     productName: "",
@@ -18,11 +16,11 @@ const AddProductForm = () => {
     tags: "",
     description: "",
   });
+  const vendorId = localStorage.getItem("vendorId");
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-    setFormData({ ...formData, [name]: newValue });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -30,21 +28,19 @@ const AddProductForm = () => {
     try {
       console.log("Submitting:", formData);
 
-      await axios.post("https://backend-d6mx.vercel.app/addproduct",{ vendor: vendorId,
+      await axios.post("https://backend-d6mx.vercel.app/addproduct", {
+        Vendor:vendorId,
         ProductName: formData.productName,
         ProductPrice: formData.price,
         ProductStock: formData.stock,
-        ProductDescripition: formData.description,
+        ProductDescription: formData.description,
         ProductTags: formData.tags,
         ProductCategory: formData.category,
         ProductSubCategory: formData.subCategory,
-        ProductLocation: formData.location,
-        ProductIsAvaiable: formData.isAvailable,
-        ProductImageUrl: "" // optional
+        ProductLocation: formData.location || "",
       });
 
       alert("Product submitted successfully!");
-      console.log(vendorId);
       navigate("/Product");
     } catch (error) {
       console.error("Error submitting product:", error);
@@ -68,9 +64,7 @@ const AddProductForm = () => {
       <div className="container mt-5">
         <ul className="nav nav-tabs mb-4">
           <li className="nav-item">
-            <button className="nav-link active" aria-current="page">
-              Single Product
-            </button>
+            <button className="nav-link active">Single Product</button>
           </li>
           <li className="nav-item">
             <button className="nav-link" onClick={() => navigate("/addproduct/BulkUpload")}>
@@ -180,19 +174,6 @@ const AddProductForm = () => {
                 onChange={handleInputChange}
                 required
               />
-            </div>
-
-            <div className="form-check mb-3">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="featured"
-                checked={formData.featured}
-                onChange={handleInputChange}
-              />
-              <label className="form-check-label">
-                Feature this product on store homepage
-              </label>
             </div>
 
             <div className="d-flex gap-2">

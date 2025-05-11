@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import "./product_vendor.css";
 import Navbar from './navbar';
 import {
   BarChart,
@@ -40,13 +39,9 @@ function Product() {
 
   const getData = () => {
     switch (view) {
-      case 'day':
-        return dataDay;
-      case 'month':
-        return dataMonth;
-      case 'week':
-      default:
-        return dataWeek;
+      case 'day': return dataDay;
+      case 'month': return dataMonth;
+      default: return dataWeek;
     }
   };
 
@@ -56,114 +51,127 @@ function Product() {
         homeLabel="Home"
         homeUrl="/Product"
         jobsLabel="Products"
-        jobsUrl="/Product/order"    
+        jobsUrl="/Product/order"
         historyLabel="Orders History"
-        historyUrl="/Product/order/history" 
+        historyUrl="/Product/order/history"
         earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"   
+        earningsUrl="/vendor/earnings"
       />
 
-
-      <div className="product_Containers">
-        {/* Product Cards */}
-        <div className="prodcuts_cards">
-          <span className="Product_Heading1">Total Sales</span>
-          <h3 className="Product_Heading2">₹30,000</h3>
-          <i className="bi bi-graph-up icon-top"></i>
-        </div>
-        <div className="prodcuts_cards">
-          <span className="Product_Heading1">New Order</span>
-          <h3 className="Product_Heading2">30</h3>
-          <i className="bi bi-bag icon-top"></i>
-        </div>
-        <div className="prodcuts_cards">
-          <span className="Product_Heading1">Pending Shipments</span>
-          <h3 className="Product_Heading2">12</h3>
-          <i className="bi bi-truck icon-top"></i>
-        </div>
-        <div className="prodcuts_cards">
-          <span className="Product_Heading1">Customer Rating</span>
-          <h3 className="Product_Heading2">
-            4.0/5.0 <br />
-            <span className="Customer_Reviews_product">(142 Reviews)</span>
-          </h3>
-          <i className="bi bi-star-fill icon-top"></i>
+      {/* Product Cards */}
+      <div className="container my-4">
+        <div className="row g-3">
+          <div className="col-md-3">
+            <div className="card text-white bg-primary h-100">
+              <div className="card-body">
+                <h6 className="card-title">Total Sales</h6>
+                <h4 className="card-text">₹30,000</h4>
+                <i className="bi bi-graph-up fs-3"></i>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-white bg-success h-100">
+              <div className="card-body">
+                <h6 className="card-title">New Orders</h6>
+                <h4 className="card-text">30</h4>
+                <i className="bi bi-bag fs-3"></i>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-white bg-warning h-100">
+              <div className="card-body">
+                <h6 className="card-title">Pending Shipments</h6>
+                <h4 className="card-text">12</h4>
+                <i className="bi bi-truck fs-3"></i>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-white bg-info h-100">
+              <div className="card-body">
+                <h6 className="card-title">Customer Rating</h6>
+                <h5 className="card-text">4.0/5.0</h5>
+                <small className="text-white-50">(142 Reviews)</small><br />
+                <i className="bi bi-star-fill fs-3"></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* NEW Full Width Graph Section */}
-      <div className="full_width_chart_container">
-        <div className="chart_header">
-          <span className="Product_Heading3">Overall Sales Analytics</span>
+      {/* Chart */}
+      <div className="container my-5">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h5 className="fw-bold">Overall Sales Analytics</h5>
           <div>
             <button onClick={() => setView('day')} className={`btn btn-sm ${view === 'day' ? 'btn-primary' : 'btn-outline-primary'} me-1`}>Day</button>
             <button onClick={() => setView('week')} className={`btn btn-sm ${view === 'week' ? 'btn-primary' : 'btn-outline-primary'} me-1`}>Week</button>
             <button onClick={() => setView('month')} className={`btn btn-sm ${view === 'month' ? 'btn-primary' : 'btn-outline-primary'}`}>Month</button>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={getData()}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="sales" fill="#007bff" radius={[5, 5, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div style={{ height: 350 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={getData()}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="sales" fill="#007bff" radius={[5, 5, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
+
       {/* Recent Orders Table */}
-<div className="recent_orders_table_container">
-  <h4 className="Product_Heading3">Recent Orders</h4>
-  <div className="table-responsive">
-    <table className="table table-striped table-bordered mt-3">
-      <thead className="table">
-        <tr>
-          <th>Order ID</th>
-          <th>Product Name</th>
-          <th>Customer</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Amount</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>#1234</td>
-          <td>Wireless Mouse</td>
-          <td>John Doe</td>
-          <td>Apr 22, 2025</td>
-          <td><span className="badge bg-warning">Pending</span></td>
-          <td>₹899</td>
-          <td><a href="/">View Details</a></td>
-
-        </tr>
-        <tr>
-          <td>#1235</td>
-          <td>USB-C Charger</td>
-          <td>Priya Sharma</td>
-          <td>Apr 21, 2025</td>
-          <td><span className="badge bg-success">Delivered</span></td>
-          <td>₹1,299</td>
-          <td><a href="/">View Details</a></td>
-
-
-        </tr>
-        <tr>
-          <td>#1236</td>
-          <td>Laptop Stand</td>
-          <td>Ravi Kumar</td>
-          <td>Apr 20, 2025</td>
-          <td><span className="badge bg-danger">Cancelled</span></td>
-          <td>₹749</td>
-          <td><a href="/">View Details</a></td>
-
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
+      <div className="container mb-5">
+        <h5 className="fw-bold mb-3">Recent Orders</h5>
+        <div className="table-responsive">
+          <table className="table table-striped table-bordered">
+            <thead className="table-light">
+              <tr>
+                <th>Order ID</th>
+                <th>Product Name</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1234</td>
+                <td>Wireless Mouse</td>
+                <td>John Doe</td>
+                <td>Apr 22, 2025</td>
+                <td><span className="badge bg-warning">Pending</span></td>
+                <td>₹899</td>
+                <td><a href="/">View Details</a></td>
+              </tr>
+              <tr>
+                <td>#1235</td>
+                <td>USB-C Charger</td>
+                <td>Priya Sharma</td>
+                <td>Apr 21, 2025</td>
+                <td><span className="badge bg-success">Delivered</span></td>
+                <td>₹1,299</td>
+                <td><a href="/">View Details</a></td>
+              </tr>
+              <tr>
+                <td>#1236</td>
+                <td>Laptop Stand</td>
+                <td>Ravi Kumar</td>
+                <td>Apr 20, 2025</td>
+                <td><span className="badge bg-danger">Cancelled</span></td>
+                <td>₹749</td>
+                <td><a href="/">View Details</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
