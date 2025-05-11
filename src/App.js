@@ -37,8 +37,8 @@ function App() {
         <Route path="/vendor/:id/Payment" element={<OrderStatus />} />
         <Route path="/vendor/:id/Payment/success" element={<JobPaymentSummary />} />
         <Route path="/vendor/:id/ViewProduct" element={<ProductList />} />
-        <Route path="/addproduct/:vendorId" element={<AddProductForm />} />
-        <Route path="/addproduct/:vendorId/BulkUpload" element={<BulkProductUpload />} />
+        <Route path="/addproduct/:id" element={<AddProductForm />} />
+        <Route path="/addproduct/:id/BulkUpload" element={<BulkProductUpload />} />
 
         {/* Product Routes */}
         <Route path="/Product/:id" element={<Product />} />
