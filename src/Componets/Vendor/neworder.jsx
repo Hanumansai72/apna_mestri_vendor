@@ -39,7 +39,7 @@ const NewHistory = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(`http://localhost:8031/pending-orders`);
+        const res = await axios.get(`https://backend-d6mx.vercel.app/pending-orders`);
 
         const allOrders = Array.isArray(res.data.orders)
           ? res.data.orders

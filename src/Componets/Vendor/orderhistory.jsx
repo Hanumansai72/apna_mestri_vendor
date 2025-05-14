@@ -15,7 +15,7 @@ const OrderHistory = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`http://localhost:8031/wow`);
+        const res = await axios.get(`https://backend-d6mx.vercel.app/wow`);
         const allOrders = res.data.all || [];
         setOrders(allOrders);
       } catch (err) {
