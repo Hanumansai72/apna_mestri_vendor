@@ -4,8 +4,42 @@ import Navbar from "./navbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// Full categoryBrands object
+const categoryBrands = {
+  // Civil Vendors
+  Cement: { subCategories: ["UltraTech", "ACC", "Ambuja", "Dalmia", "Ramco"] },
+  Steel: { subCategories: ["TATA Tiscon", "JSW Steel", "Jindal Panther", "SAIL"] },
+  Plumbing: { subCategories: ["Ashirvad", "Astral", "Prince", "Supreme"] },
+  Electrical: { subCategories: ["Havells", "Finolex", "Polycab", "RR Kabel"] },
+  Paints: { subCategories: ["Asian Paints", "Berger", "Nerolac", "Indigo"] },
+  Bricks: { subCategories: ["Wienerberger", "Porotherm", "Jindal Bricks"] },
+  Sand: { subCategories: ["Robo Sand", "River Sand", "M-Sand"] },
+  Aggregates: { subCategories: ["20mm Aggregate", "40mm Aggregate", "10mm Aggregate"] },
+  Concrete: { subCategories: ["RMC India", "Ultratech RMC", "ACC Ready Mix"] },
+  Tiles: { subCategories: ["Kajaria", "Somany", "Nitco", "Johnson"] },
+  Glass: { subCategories: ["Saint-Gobain", "AIS Glass", "Modiguard"] },
+  Doors: { subCategories: ["Greenply", "CenturyPly", "Kitply", "Fenesta"] },
+  Windows: { subCategories: ["Fenesta", "UPVC India", "Windoor"] },
+  Roofing: { subCategories: ["Tata Shaktee", "Everest", "JSW Colouron+"] },
+  GroutsSealants: { subCategories: ["Dr. Fixit", "MYK LATICRETE", "Roff"] },
+
+  // Interior Vendors
+  Lighting: { subCategories: ["Philips", "Syska", "Wipro", "Halonix"] },
+  Kitchen: { subCategories: ["Hettich", "Häfele", "Godrej Interio"] },
+  Wardrobe: { subCategories: ["Godrej", "Durian", "Urban Ladder"] },
+  Wallpaper: { subCategories: ["Nilaya", "Excel", "Marburg"] },
+  Curtains: { subCategories: ["D'Decor", "Fabindia", "Spaces"] },
+  Furniture: { subCategories: ["IKEA", "Urban Ladder", "Pepperfry"] },
+  BathroomFittings: { subCategories: ["Jaquar", "Kohler", "Hindware"] },
+  FalseCeiling: { subCategories: ["Gyproc", "Armstrong", "USG Boral"] },
+  Flooring: { subCategories: ["Pergo", "Greenlam", "Squarefoot"] },
+  ModularFurniture: { subCategories: ["Godrej Interio", "Featherlite", "Zuari"] },
+  DecorativePanels: { subCategories: ["Merino", "Greenlam", "Century Laminates"] },
+  SmartHome: { subCategories: ["Schneider", "Anchor", "Legrand"] },
+};
+
 const AddProductForm = () => {
-  const vendorId=localStorage.getItem("vendorId")
+  const vendorId = localStorage.getItem("vendorId");
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -98,12 +132,22 @@ const AddProductForm = () => {
                 className="form-select"
                 name="category"
                 value={formData.category}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  setFormData({
+                    ...formData,
+                    category: e.target.value,
+                    subCategory: "", // Reset subcategory when category changes
+                  });
+                }}
                 required
               >
                 <option value="">Select category</option>
-                <option value="Tools">Tools</option>
-                <option value="Materials">Materials</option>
+                {Object.keys(categoryBrands).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -117,8 +161,11 @@ const AddProductForm = () => {
                 required
               >
                 <option value="">Select sub-category</option>
-                <option value="Electric">Electric</option>
-                <option value="Plumbing">Plumbing</option>
+                {categoryBrands[formData.category]?.subCategories.map((brand, index) => (
+                  <option key={index} value={brand}>
+                    {brand}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -179,14 +226,22 @@ const AddProductForm = () => {
                 required
               />
             </div>
+            <div className="col-md-12 mb-3">
+  <label htmlFor="productImage">Add Product Image</label><br />
+  <input 
+    type="file" 
+    className="form-control" 
+    id="productImage" 
+    name="productImage" 
+    accept="image/*"
+  />
+</div>
 
             <div className="d-flex gap-2">
               <button type="reset" className="btn btn-secondary">
                 Reset Form
               </button>
-              <button type="button" className="btn btn-success">
-                Save as Draft
-              </button>
+              
               <button type="submit" className="btn btn-primary">
                 Publish Product
               </button>

@@ -37,6 +37,7 @@ const ProductList = () => {
               : parseInt(product.ProductStock) < 10
               ? "Low Stock"
               : "Available",
+          description: product.ProductDescripition,
         }));
 
         setProducts(mappedProducts);
@@ -214,6 +215,15 @@ const ProductList = () => {
                   type="number"
                   name="stock"
                   value={editProduct.stock}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="description"
+                  value={editProduct.description}
                   onChange={handleInputChange}
                 />
               </Form.Group>
