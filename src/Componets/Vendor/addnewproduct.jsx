@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./navbar";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const AddProductForm = () => {
-  const { vendorId } = useParams();
+  const vendorId=localStorage.getItem("vendorId")
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
