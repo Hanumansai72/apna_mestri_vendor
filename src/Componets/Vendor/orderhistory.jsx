@@ -71,7 +71,6 @@ const OrderHistory = () => {
     }
   };
 
-  // Collect all unique clients
   const clientOptions = Array.from(new Set(orders.map(o => o.customerName))).filter(Boolean);
 
   return (
@@ -172,7 +171,6 @@ const OrderHistory = () => {
           </tbody>
         </Table>
 
-        {/* Pagination placeholder (static for now) */}
         <Pagination className="justify-content-end">
           <Pagination.First />
           <Pagination.Prev />
