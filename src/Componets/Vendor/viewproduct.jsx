@@ -10,6 +10,12 @@ import {
   Modal,
 } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
+import Navbar from "./navbar";
+import { BiPlus } from "react-icons/bi";
+import { Link } from "react-router-dom";
+
+
+const id=localStorage.getItem("vendorId")
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -75,17 +81,34 @@ const ProductList = () => {
     setEditProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Filter products by search term
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
+    <div>
+      <Navbar
+  homeLabel="Home"
+  homeUrl={`/Product/${id}`}
+  jobsLabel="Products"
+  jobsUrl={`/product/${id}/ViewProduct`}
+  historyLabel="New Orders"
+  historyUrl={`/product/${id}/order`}
+  earningsLabel="Order History"
+  earningsUrl={`/product/${id}/order/history`}
+/>
     <div className="container mt-4">
-      <h3>Your Products</h3>
-      <p>Manage and update your product listings.</p>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3>Your Products</h3>
+    <p className="mb-0">Manage and update your product listings.</p>
+  </div>
+  <Link to={`/addproduct/${id}`} style={{textDecoration:"none"}}><Button variant="success" className="d-flex align-items-center">
+    <BiPlus size={20} className="me-1" />
+    Add Product
+  </Button></Link>
+</div>
 
-      {/* Search and Filter Controls */}
       <Row className="mb-4">
         <Col md={4}>
           <Form.Control
@@ -267,7 +290,7 @@ const ProductList = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+    </div></div>
   );
 };
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { Table, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
 import Navbar from './navbar';
 
+const id=localStorage.getItem("vendorId")
+
 const civilProducts = [
   {
     id: 'ORD-001',
@@ -96,15 +98,15 @@ const OrderHistory = () => {
   return (
     <div>
 <Navbar
-        homeLabel="Home"
-        homeUrl="/vendor/product/dashboard"
-        jobsLabel="Products"
-        jobsUrl="/vendor/neworder"    
-        historyLabel="Orders History"
-        historyUrl="/vendor/ordershistory" 
-        earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"   
-      />      
+  homeLabel="Home"
+  homeUrl={`/Product/${id}`}
+  jobsLabel="Products"
+  jobsUrl={`/product/${id}/ViewProduct`}
+  historyLabel="New Orders"
+  historyUrl={`/product/${id}/order`}
+  earningsLabel="Order History"
+  earningsUrl={`/product/${id}/order/history`}
+/>
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>Order History</h4>

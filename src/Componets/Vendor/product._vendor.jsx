@@ -10,6 +10,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+const id=localStorage.getItem("vendorId")
+
 const dataDay = [
   { name: '12AM', sales: 200 },
   { name: '6AM', sales: 800 },
@@ -48,17 +50,15 @@ function Product() {
   return (
     <div>
       <Navbar
-        homeLabel="Home"
-        homeUrl="/Product"
-        jobsLabel="Products"
-        jobsUrl="/Product/order"
-        historyLabel="Orders History"
-        historyUrl="/Product/order/history"
-        earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"
-      />
-
-      {/* Product Cards */}
+  homeLabel="Home"
+  homeUrl={`/Product/${id}`}
+  jobsLabel="Products"
+  jobsUrl={`/product/${id}/ViewProduct`}
+  historyLabel="New Orders"
+  historyUrl={`/product/${id}/order`}
+  earningsLabel="Order History"
+  earningsUrl={`/product/${id}/order/history`}
+/>
       <div className="container my-4">
         <div className="row g-3">
           <div className="col-md-3">

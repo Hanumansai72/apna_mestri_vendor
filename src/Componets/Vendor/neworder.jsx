@@ -3,6 +3,8 @@ import { Table, Badge, Button, Form, Row, Col, Pagination, Modal } from 'react-b
 import Navbar from './navbar';
 import { Link } from 'react-router-dom';
 
+
+const id=localStorage.getItem("vendorId")
 const civilProducts = [
   {
     id: 'NEW-ORD-001',
@@ -93,15 +95,15 @@ const NewHistory = () => {
   return (
     <div>
       <Navbar
-        homeLabel="Home"
-        homeUrl="/Product"
-        jobsLabel="Products"
-        jobsUrl="/Product/order"    
-        historyLabel="Orders History"
-        historyUrl="/Product/order/history" 
-        earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"   
-      />
+  homeLabel="Home"
+  homeUrl={`/Product/${id}`}
+  jobsLabel="Products"
+  jobsUrl={`/product/${id}/ViewProduct`}
+  historyLabel="New Orders"
+  historyUrl={`/product/${id}/order`}
+  earningsLabel="Order History"
+  earningsUrl={`/product/${id}/order/history`}
+/>
 
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">

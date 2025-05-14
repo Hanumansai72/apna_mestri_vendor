@@ -3,6 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Navbar from "./navbar";
 
+const id=localStorage.getItem("vendorId")
+
 const BulkProductUpload = () => {
   const [fileName, setFileName] = useState("");
   const [uploadPreview, setUploadPreview] = useState([]);
@@ -26,15 +28,15 @@ const BulkProductUpload = () => {
   return (
     <div>
       <Navbar
-        homeLabel="Home"
-        homeUrl="/Product"
-        jobsLabel="Products"
-        jobsUrl="/Product/order"
-        historyLabel="Orders History"
-        historyUrl="/Product/order/history"
-        earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"
-      />
+  homeLabel="Home"
+  homeUrl={`/Product/${id}`}
+  jobsLabel="Products"
+  jobsUrl={`/product/${id}/ViewProduct`}
+  historyLabel="New Orders"
+  historyUrl={`/product/${id}/order`}
+  earningsLabel="Order History"
+  earningsUrl={`/product/${id}/order/history`}
+/>
 
       <div className="container mt-5 p-4 border rounded shadow-sm">
         <h4 className="mb-4">Bulk Product Upload</h4>

@@ -20,7 +20,6 @@ import BulkProductUpload from './Componets/Vendor/Bulkupload';
 import ProductList from './Componets/Vendor/viewproduct';
 import ProtectedRoute from './Componets/Vendor/ProtectedRoute';
 
-// Reusable Protected wrapper
 const Protected = ({ element }) => (
   <ProtectedRoute>
     {element}
@@ -32,19 +31,19 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/vendor/login" element={<LoginPage />} />
-        <Route path="/vendor/register" element={<Registration />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<Registration />} />
 
         {/* Protected Routes */}
         <Route path="/vendor/:id/" element={<Protected element={<TechnicalNonDashboard />} />} />
-        <Route path="/vendor/:id/settings" element={<Protected element={<VendorProfileSettings />} />} />
+        <Route path=":id/settings" element={<Protected element={<VendorProfileSettings />} />} />
         <Route path="/vendor/:id/Jobs" element={<Protected element={<JobListings />} />} />
         <Route path="/vendor/:id/Job/history" element={<Protected element={<JobHistory />} />} />
         <Route path="/vendor/:id/Job/Progress" element={<Protected element={<JobInProgress />} />} />
         <Route path="/vendor/:id/Job/Progress/reached" element={<Protected element={<JobProgress />} />} />
         <Route path="/vendor/:id/Payment" element={<Protected element={<OrderStatus />} />} />
         <Route path="/vendor/:id/Payment/success" element={<Protected element={<JobPaymentSummary />} />} />
-        <Route path="/vendor/:id/ViewProduct" element={<Protected element={<ProductList />} />} />
+        <Route path="/product/:id/ViewProduct" element={<Protected element={<ProductList />} />} />
         <Route path="/addproduct/:id" element={<Protected element={<AddProductForm />} />} />
         <Route path="/addproduct/:id/BulkUpload" element={<Protected element={<BulkProductUpload />} />} />
         <Route path="/Product/:id" element={<Protected element={<Product />} />} />

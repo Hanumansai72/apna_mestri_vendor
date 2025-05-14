@@ -4,7 +4,8 @@ import Navbar from "./navbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// Full categoryBrands object
+const id=localStorage.getItem("vendorId")
+
 const categoryBrands = {
   // Civil Vendors
   Cement: { subCategories: ["UltraTech", "ACC", "Ambuja", "Dalmia", "Ramco"] },
@@ -85,15 +86,16 @@ const AddProductForm = () => {
 
   return (
     <div>
+      
       <Navbar
         homeLabel="Home"
-        homeUrl={`/Product/${vendorId}`}
+        homeUrl={`/Product/${id}`}
         jobsLabel="Products"
-        jobsUrl={`/vendor/${vendorId}/products`}
-        historyLabel="Orders History"
-        historyUrl={`/vendor/${vendorId}/orders/history`}
-        earningsLabel="Earnings"
-        earningsUrl={`/vendor/${vendorId}/earnings`}
+        jobsUrl={`/product/${id}/ViewProduct"`}
+        historyLabel="New Orders"
+        historyUrl={`/product/${id}/order`}
+        earningsLabel="Order History"
+        earningsUrl={`/product/${id}/order/history`}
       />
 
       <div className="container mt-5">
