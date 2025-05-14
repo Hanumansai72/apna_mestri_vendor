@@ -1,130 +1,109 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
 import Navbar from './navbar';
-
-const id=localStorage.getItem("vendorId")
-
-const civilProducts = [
-  {
-    id: 'ORD-001',
-    productName: 'Red Bricks',
-    customerName: 'Rajesh Construction',
-    quantity: 5000,
-    price: 25000,
-    date: '2025-04-20',
-    status: 'Delivered',
-  },
-  {
-    id: 'ORD-002',
-    productName: 'River Sand',
-    customerName: 'BuildRight Co.',
-    quantity: 10,
-    price: 15000,
-    date: '2025-04-18',
-    status: 'In Transit',
-  },
-  {
-    id: 'ORD-003',
-    productName: 'Cement (50kg bags)',
-    customerName: 'Skyline Infra',
-    quantity: 100,
-    price: 32000,
-    date: '2025-04-16',
-    status: 'Delivered',
-  },
-  {
-    id: 'ORD-004',
-    productName: 'Crushed Stone',
-    customerName: 'Urban Builders',
-    quantity: 8,
-    price: 12000,
-    date: '2025-04-22',
-    status: 'Pending',
-  },
-  {
-    id: 'ORD-005',
-    productName: 'Steel Rods (TMT)',
-    customerName: 'Future Homes',
-    quantity: 200,
-    price: 58000,
-    date: '2025-04-21',
-    status: 'Cancelled',
-  },
-  {
-    id: 'ORD-006',
-    productName: 'Concrete Blocks',
-    customerName: 'Dream Projects Ltd.',
-    quantity: 1500,
-    price: 19500,
-    date: '2025-04-23',
-    status: 'Delivered',
-  },
-  {
-    id: 'ORD-007',
-    productName: 'Plaster Sand',
-    customerName: 'Golden Heights',
-    quantity: 6,
-    price: 9000,
-    date: '2025-04-19',
-    status: 'In Transit',
-  },
-  {
-    id: 'ORD-008',
-    productName: 'Tiles (Ceramic)',
-    customerName: 'Elegant Interiors',
-    quantity: 300,
-    price: 27000,
-    date: '2025-04-15',
-    status: 'Delivered',
-  },
-];
-
-const StatusBadge = (status) => {
-  switch (status) {
-    case 'Delivered':
-      return <Badge bg="success">Delivered</Badge>;
-    case 'In Transit':
-      return <Badge bg="info">In Transit</Badge>;
-    case 'Pending':
-      return <Badge bg="warning">Pending</Badge>;
-    case 'Cancelled':
-      return <Badge bg="danger">Cancelled</Badge>;
-    default:
-      return <Badge bg="secondary">{status}</Badge>;
-  }
-};
+import axios from 'axios';
 
 const OrderHistory = () => {
+  const id = localStorage.getItem("vendorId");
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [dateFilter, setDateFilter] = useState("Last 30 days");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [clientFilter, setClientFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8031/wow`);
+        const allOrders = res.data.all || [];
+        setOrders(allOrders);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      }
+    };
+    fetchOrder();
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...orders];
+
+    const now = new Date();
+    filtered = filtered.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      if (dateFilter === "Last 7 days") {
+        return now - orderDate <= 7 * 24 * 60 * 60 * 1000;
+      } else if (dateFilter === "Last 30 days") {
+        return now - orderDate <= 30 * 24 * 60 * 60 * 1000;
+      } else if (dateFilter === "This Year") {
+        return orderDate.getFullYear() === now.getFullYear();
+      }
+      return true;
+    });
+
+    if (statusFilter !== "All" && statusFilter !== "All statuses") {
+      filtered = filtered.filter(order => order.orderStatus === statusFilter);
+    }
+
+    if (clientFilter !== "All" && clientFilter !== "All clients") {
+      filtered = filtered.filter(order => order.customerName === clientFilter);
+    }
+
+    if (searchQuery.trim() !== "") {
+      const lowerSearch = searchQuery.toLowerCase();
+      filtered = filtered.filter(order =>
+        (order._id || "").toLowerCase().includes(lowerSearch) ||
+        (order.vendorId || "").toLowerCase().includes(lowerSearch) ||
+        (order.productId || "").toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, dateFilter, statusFilter, clientFilter, searchQuery]);
+
+  const StatusBadge = ({ status }) => {
+    switch (status) {
+      case 'Delivered': return <Badge bg="success">Delivered</Badge>;
+      case 'In Transit': return <Badge bg="info">In Transit</Badge>;
+      case 'Pending': return <Badge bg="warning">Pending</Badge>;
+      case 'Cancelled': return <Badge bg="danger">Cancelled</Badge>;
+      default: return <Badge bg="secondary">{status}</Badge>;
+    }
+  };
+
+  // Collect all unique clients
+  const clientOptions = Array.from(new Set(orders.map(o => o.customerName))).filter(Boolean);
+
   return (
     <div>
-<Navbar
-  homeLabel="Home"
-  homeUrl={`/Product/${id}`}
-  jobsLabel="Products"
-  jobsUrl={`/product/${id}/ViewProduct`}
-  historyLabel="New Orders"
-  historyUrl={`/product/${id}/order`}
-  earningsLabel="Order History"
-  earningsUrl={`/product/${id}/order/history`}
-/>
+      <Navbar
+        homeLabel="Home"
+        homeUrl={`/Product/${id}`}
+        jobsLabel="Products"
+        jobsUrl={`/product/${id}/ViewProduct`}
+        historyLabel="New Orders"
+        historyUrl={`/product/${id}/order`}
+        earningsLabel="Order History"
+        earningsUrl={`/product/${id}/order/history`}
+      />
+
       <div className="container mt-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>Order History</h4>
-          <div>
-            <Button variant="outline-secondary" className="me-2">📥 Export</Button>
-          </div>
+          <Button variant="outline-secondary">📥 Export</Button>
         </div>
 
+        {/* Filters */}
         <Row className="mb-3">
           <Col md={3}>
-            <Form.Select>
+            <Form.Select value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
               <option>Last 30 days</option>
               <option>Last 7 days</option>
               <option>This Year</option>
             </Form.Select>
           </Col>
           <Col md={3}>
-            <Form.Select>
+            <Form.Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               <option>All statuses</option>
               <option>Delivered</option>
               <option>In Transit</option>
@@ -133,55 +112,72 @@ const OrderHistory = () => {
             </Form.Select>
           </Col>
           <Col md={3}>
-            <Form.Select>
+            <Form.Select value={clientFilter} onChange={e => setClientFilter(e.target.value)}>
               <option>All clients</option>
-              <option>Rajesh Construction</option>
-              <option>BuildRight Co.</option>
-              {/* Add other customers as needed */}
+              {clientOptions.map((client, idx) => (
+                <option key={idx}>{client}</option>
+              ))}
             </Form.Select>
           </Col>
           <Col md={3}>
-            <Form.Control placeholder="Search orders..." />
+            <Form.Control
+              placeholder="Search orders..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
           </Col>
         </Row>
 
-        <Table responsive bordered hover className="job-table">
+        {/* Table */}
+        <Table responsive bordered hover>
           <thead className="table-light">
             <tr>
               <th>Order ID</th>
-              <th>Customer</th>
-              <th>Product</th>
-              <th>Date</th>
-              <th>Status</th>
+              <th>Vendor ID</th>
+              <th>Product ID</th>
               <th>Quantity</th>
-              <th>Price</th>
-              <th>Actions</th>
+              <th>Price/Unit</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Ordered On</th>
             </tr>
           </thead>
           <tbody>
-            {civilProducts.map((job, index) => (
-              <tr key={index}>
-                <td><a href="/" className='ID_job'>{job.id}</a></td>
-                <td>{job.customerName}</td>
-                <td>{job.productName}</td>
-                <td>{job.date}</td>
-                <td>{StatusBadge(job.status)}</td>
-                <td>{job.quantity}</td>
-                <td>₹{job.price.toLocaleString()}</td>
-                <td><Button variant="outline-secondary" size="sm">📋</Button></td>
-              </tr>
-            ))}
+            {filteredOrders.length === 0 ? (
+              <tr><td colSpan="9" className="text-center">No orders found.</td></tr>
+            ) : (
+              filteredOrders.map((order, index) => (
+                <tr key={index}>
+                  <td>{order._id}</td>
+                  <td>{order.vendorId}</td>
+                  <td>{order.productId}</td>
+                  <td>{order.quantity}</td>
+                  <td>₹{order.pricePerUnit}</td>
+                  <td>₹{order.totalAmount}</td>
+                  <td><StatusBadge status={order.orderStatus} /></td>
+                  <td>
+                    <Badge bg={
+                      order.paymentStatus === 'Paid' ? 'success'
+                        : order.paymentStatus === 'Failed' ? 'danger'
+                        : 'warning'
+                    }>
+                      {order.paymentStatus}
+                    </Badge>
+                  </td>
+                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </Table>
 
+        {/* Pagination placeholder (static for now) */}
         <Pagination className="justify-content-end">
           <Pagination.First />
           <Pagination.Prev />
           <Pagination.Item active>1</Pagination.Item>
           <Pagination.Item>2</Pagination.Item>
-          <Pagination.Item>3</Pagination.Item>
-          <Pagination.Item>4</Pagination.Item>
-          <Pagination.Item>5</Pagination.Item>
           <Pagination.Next />
           <Pagination.Last />
         </Pagination>

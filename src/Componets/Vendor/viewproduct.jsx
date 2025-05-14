@@ -23,6 +23,9 @@ const ProductList = () => {
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
+  
+
+
   useEffect(() => {
     const vendorId = localStorage.getItem("vendorId");
 
@@ -190,7 +193,6 @@ const ProductList = () => {
         ))}
       </Row>
 
-      {/* Pagination (Static Example) */}
       <div className="d-flex justify-content-end mt-4">
         <nav>
           <ul className="pagination">
