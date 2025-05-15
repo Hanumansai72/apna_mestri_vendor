@@ -1,92 +1,162 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './navbar';
 import './vendor_settings.css';
+import axios from 'axios';
 
 function VendorProfileSettings() {
+  const [formdata, setFormData] = useState({
+    Business_Name: '',
+    Owner_name: '',
+    Email_address: '',
+    Phone_number: '',
+    Business_address: '',
+    Category: '',
+    Sub_Category: '',
+    Tax_ID: '',
+    Password: ''
+  });
+
+  const id = localStorage.getItem("vendorId");
+
+  useEffect(() => {
+  axios
+    .get(`http://localhost:8031/${id}/settings`)
+    .then((res) => {
+      const data = res.data || {};
+      console.log(data)
+      setFormData({
+        Business_Name: data.datasettings.Business_Name || '',
+        Owner_name: data.datasettings.Owner_name || '',
+        Email_address: data.datasettings.Email_address || '',
+        Phone_number: data.datasettings.Phone_number || '',
+        Business_address: data.datasettings.Business_address || '',
+        Category: data.datasettings.Category || '',
+        Sub_Category: data.datasettings.Sub_Category || '',
+        Tax_ID: data.datasettings.Tax_ID || '',
+        Password: data.datasettings.Password || ''
+        
+      });
+    })
+
+    .catch((err) => {
+      console.error('Failed to fetch vendor data', err);
+    });
+}, [id]);
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
   return (
     <div>
       <Navbar
-              homeLabel="Home"
-              homeUrl="/Product"
-              jobsLabel="Products"
-              jobsUrl="/Product/order"    
-              historyLabel="Orders History"
-              historyUrl="/Product/order/history" 
-              earningsLabel="Earnings"
-              earningsUrl="/vendor/earnings"   
-            />
+        homeLabel="Home"
+        homeUrl="/Product"
+        jobsLabel="Products"
+        jobsUrl="/Product/order"
+        historyLabel="Orders History"
+        historyUrl="/Product/order/history"
+        earningsLabel="Earnings"
+        earningsUrl="/vendor/earnings"
+      />
+
       <div className="container settings_vendor mt-4">
         <h3 className="Settings_Heading mb-4">Account Settings</h3>
 
-        {/* Personal Info */}
-        <div className="row mb-4">
-          <div className="col-md-6">
-            <label>First Name</label>
-            <input type="text" className="form-control" value="Alex" />
-          </div>
-          <div className="col-md-6">
-            <label>Last Name</label>
-            <input type="text" className="form-control" value="Morgan" />
-          </div>
+        <div className="mb-4">
+          <label>Owner Name</label>
+          <input
+            type="text"
+            className="form-control"
+            name="Owner_name"
+            value={formdata.Owner_name}
+            onChange={handleChange}
+          />
         </div>
         <div className="mb-4">
           <label>Email Address</label>
-          <input type="email" className="form-control" value="alex.morgan@example.com" />
+          <input
+            type="email"
+            className="form-control"
+            name="Email_address"
+            value={formdata.Email_address}
+            onChange={handleChange}
+          />
         </div>
         <div className="mb-4">
           <label>Phone Number</label>
-          <input type="text" className="form-control" value="+1 (555) 123-4567" />
+          <input
+            type="text"
+            className="form-control"
+            name="Phone_number"
+            value={formdata.Phone_number}
+            onChange={handleChange}
+          />
         </div>
         <div className="mb-4">
-          <label>Location</label>
-          <select className="form-select">
-            <option>San Francisco, CA</option>
-          </select>
-        </div>
-
-        {/* Business Info */}
-        <div className="mb-4">
-          <h5 className="section-title">Business Information</h5>
-        </div>
-        <div className="mb-3">
           <label>Business Name</label>
-          <input type="text" className="form-control" value="Morgan Technical Services" />
+          <input
+            type="text"
+            className="form-control"
+            name="Business_Name"
+            value={formdata.Business_Name}
+            onChange={handleChange}
+          />
         </div>
-        <div className="mb-3">
-          <label>Business Description</label>
-          <textarea className="form-control" rows="3">
-            Providing expert IT infrastructure and networking solutions for businesses of all sizes. Specializing in network security, cloud migration, and system optimization.
-          </textarea>
+        <div className="mb-4">
+          <label>Business Address</label>
+          <input
+            type="text"
+            className="form-control"
+            name="Business_address"
+            value={formdata.Business_address}
+            onChange={handleChange}
+          />
         </div>
         <div className="row mb-3">
           <div className="col-md-6">
-            <label>Tax ID / EIN</label>
-            <input type="text" className="form-control" value="12-3456789" />
+            <label>Category</label>
+            <input
+              type="text"
+              className="form-control"
+              name="Category"
+              value={formdata.Category}
+              onChange={handleChange}
+            />
           </div>
           <div className="col-md-6">
-            <label>Business Type</label>
-            <select className="form-select">
-              <option>Sole Proprietorship</option>
-            </select>
+            <label>Sub Category</label>
+            <input
+              type="text"
+              className="form-control"
+              name="Sub_Category"
+              value={formdata.Sub_Category}
+              onChange={handleChange}
+            />
           </div>
         </div>
-        <div className="mb-3">
-          <label>Business Address</label>
-          <input type="text" className="form-control" value="123 Tech Street, Suite 456" />
+        <div className="mb-4">
+          <label>Tax ID / EIN</label>
+          <input
+            type="text"
+            className="form-control"
+            name="Tax_ID"
+            value={formdata.Tax_ID}
+            onChange={handleChange}
+          />
         </div>
-        <div className="row mb-4">
-          <div className="col-md-4">
-            <input type="text" className="form-control" value="San Francisco" />
-          </div>
-          <div className="col-md-4">
-            <input type="text" className="form-control" value="CA" />
-          </div>
-          <div className="col-md-4">
-            <input type="text" className="form-control" value="94107" />
-          </div>
+        <div className="mb-4">
+          <label>Password</label>
+          <input
+            type="password"
+            className="form-control"
+            name="Password"
+            value={formdata.Password}
+            onChange={handleChange}
+          />
         </div>
 
-        {/* Notification */}
         <div className="mb-4">
           <h5 className="section-title">Notification Settings</h5>
           <div className="form-check form-switch">

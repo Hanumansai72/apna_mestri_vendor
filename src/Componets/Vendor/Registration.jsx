@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Registration() {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -11,13 +12,22 @@ function Registration() {
     Category: "",
     Sub_Category: "",
     Tax_ID: "",
-    Password:""
+    Password: ""
   });
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const subCategories = {
-    "Technical": [ "Architects", "Civil Engineer", "Site Supervisor", "Survey Engineer", "MEP Consultant", "Structural Engineer", "Project Manager", "HVAC Engineer", "Safety Engineer", "Contractor", "Interior Designer", "WaterProofing Consultant", "Acoustic Consultants" ],
-    "Non-Technical": [ "EarthWork Labour", "Civil Mason", "Shuttering/Centring Labour", "Plumber", "Electrician", "Painter", "Carpenter", "Flooring Labour", "False Ceiling Worker" ],
-    "Products": [ "Bricks / Block", "Cement / Adhesives", "Aggregate vendors", "Steel", "Stone / Tiles", "Paints", "Electrical wires & fixtures", "Plumbing pipes & fixtures", "Civil products (All handy tools for civil works)", "Glass", "Doors & Windows", "Wood and Hardware", "Fabricators", "Waterproofing products", "Landscape products", "Lights", "Electrical", "Carpenter", "Flooring and Dado", "Wall papers", "False Ceiling", "Glass work", "Cleaning products", "Furniture", "Blinds and Curtains", "Acoustics" ]
+    "Technical": [
+      "Architects", "Civil Engineer", "Site Supervisor", "Survey Engineer", "MEP Consultant",
+      "Structural Engineer", "Project Manager", "HVAC Engineer", "Safety Engineer", "Contractor",
+      "Interior Designer", "WaterProofing Consultant", "Acoustic Consultants"
+    ],
+    "Non-Technical": [
+      "EarthWork Labour", "Civil Mason", "Shuttering/Centring Labour", "Plumber",
+      "Electrician", "Painter", "Carpenter", "Flooring Labour", "False Ceiling Worker"
+    ]
   };
 
   const handleCategoryClick = (category) => {
@@ -32,6 +42,17 @@ function Registration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic validation
+    if (formData.Password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    if (!formData.Business_Name || !formData.Owner_name || !formData.Email_address || !formData.Phone_number) {
+      alert("Please fill in all required fields");
+      return;
+    }
 
     try {
       const res = await fetch('https://backend-d6mx.vercel.app/register', {
@@ -51,9 +72,9 @@ function Registration() {
           Category: "",
           Sub_Category: "",
           Tax_ID: "",
-          Password:""
-
+          Password: ""
         });
+        setConfirmPassword("");
         setSelectedCategory("");
       } else {
         alert('Registration failed');
@@ -65,6 +86,12 @@ function Registration() {
 
   return (
     <div className="container my-5">
+      <div>
+        <button className="btn btn-secondary mb-3" onClick={() => navigate('/login')}>
+          ← Back to Login
+        </button>
+      </div>
+
       <div className="text-center mb-4">
         <h2>Register as a Vendor</h2>
         <p className="text-muted">Join our marketplace as a service or product provider</p>
@@ -74,19 +101,19 @@ function Registration() {
         <div className="row g-3">
           <div className="col-md-6">
             <label className="form-label">Business Name</label>
-            <input type="text" className="form-control" name="Business_Name" value={formData.Business_Name} onChange={handleChange} />
+            <input type="text" className="form-control" name="Business_Name" value={formData.Business_Name} onChange={handleChange} required />
           </div>
           <div className="col-md-6">
             <label className="form-label">Owner Name</label>
-            <input type="text" className="form-control" name="Owner_name" value={formData.Owner_name} onChange={handleChange} />
+            <input type="text" className="form-control" name="Owner_name" value={formData.Owner_name} onChange={handleChange} required />
           </div>
           <div className="col-md-6">
             <label className="form-label">Email Address</label>
-            <input type="email" className="form-control" name="Email_address" value={formData.Email_address} onChange={handleChange} />
+            <input type="email" className="form-control" name="Email_address" value={formData.Email_address} onChange={handleChange} required />
           </div>
           <div className="col-md-6">
             <label className="form-label">Phone Number</label>
-            <input type="text" className="form-control" name="Phone_number" value={formData.Phone_number} onChange={handleChange} />
+            <input type="text" className="form-control" name="Phone_number" value={formData.Phone_number} onChange={handleChange} required />
           </div>
           <div className="col-md-6">
             <label className="form-label">Business Address</label>
@@ -98,11 +125,11 @@ function Registration() {
           </div>
           <div className="col-md-6">
             <label className="form-label">Password</label>
-            <input type="text" className="form-control" name="Password" value={formData.Password} onChange={handleChange} />
+            <input type="password" className="form-control" name="Password" value={formData.Password} onChange={handleChange} required />
           </div>
           <div className="col-md-6">
             <label className="form-label">Re-type Password</label>
-            <input type="text" className="form-control" />
+            <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
           </div>
         </div>
 
@@ -121,12 +148,12 @@ function Registration() {
           ))}
         </div>
 
-        {selectedCategory && (
+        {selectedCategory && selectedCategory !== "Products" && (
           <div className="mt-4">
             <label className="form-label">Specialization</label>
             <select className="form-select" name="Sub_Category" value={formData.Sub_Category} onChange={handleChange}>
               <option value="">Select...</option>
-              {subCategories[selectedCategory].map((item, idx) => (
+              {subCategories[selectedCategory]?.map((item, idx) => (
                 <option key={idx} value={item}>{item}</option>
               ))}
             </select>
@@ -137,6 +164,10 @@ function Registration() {
           <button type="submit" className="btn btn-primary">
             Register Now
           </button>
+        </div>
+        <div className="d-grid mt-3 text-center">
+          <label>Already have an account?</label>
+          <a href="/login">Login</a>
         </div>
       </form>
     </div>
