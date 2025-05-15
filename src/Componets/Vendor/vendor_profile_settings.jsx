@@ -20,7 +20,7 @@ function VendorProfileSettings() {
 
   useEffect(() => {
   axios
-    .get(`http://localhost:8031/${id}/settings`)
+    .get(`https://backend-d6mx.vercel.app/${id}/settings`)
     .then((res) => {
       const data = res.data || {};
       console.log(data)
