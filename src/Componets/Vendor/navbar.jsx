@@ -33,8 +33,7 @@ function Navbar({
 
   return (
     <>
-      {/* Top Navbar - Desktop Only */}
-      <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm d-none d-lg-flex">
+                 <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm d-none d-lg-flex">
         <div className="container-fluid">
           <a className="navbar-brand fw-bold" href="/">Apna Mestri</a>
 

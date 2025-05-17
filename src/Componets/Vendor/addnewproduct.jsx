@@ -4,10 +4,9 @@ import Navbar from "./navbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const id=localStorage.getItem("vendorId")
+const id = localStorage.getItem("vendorId");
 
 const categoryBrands = {
-  // Civil Vendors
   Cement: { subCategories: ["UltraTech", "ACC", "Ambuja", "Dalmia", "Ramco"] },
   Steel: { subCategories: ["TATA Tiscon", "JSW Steel", "Jindal Panther", "SAIL"] },
   Plumbing: { subCategories: ["Ashirvad", "Astral", "Prince", "Supreme"] },
@@ -23,8 +22,6 @@ const categoryBrands = {
   Windows: { subCategories: ["Fenesta", "UPVC India", "Windoor"] },
   Roofing: { subCategories: ["Tata Shaktee", "Everest", "JSW Colouron+"] },
   GroutsSealants: { subCategories: ["Dr. Fixit", "MYK LATICRETE", "Roff"] },
-
-  // Interior Vendors
   Lighting: { subCategories: ["Philips", "Syska", "Wipro", "Halonix"] },
   Kitchen: { subCategories: ["Hettich", "Häfele", "Godrej Interio"] },
   Wardrobe: { subCategories: ["Godrej", "Durian", "Urban Ladder"] },
@@ -52,6 +49,7 @@ const AddProductForm = () => {
     location: "",
     tags: "",
     description: "",
+    productImage: null,
   });
 
   const handleInputChange = (e) => {
@@ -59,12 +57,31 @@ const AddProductForm = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, productImage: e.target.files[0] });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      console.log("Submitting:", formData);
 
-      await axios.post("https://backend-d6mx.vercel.app/addproduct", {
+    try {
+      let imageUrl = "";
+
+      if (formData.productImage) {
+        const cloudinaryData = new FormData();
+        cloudinaryData.append("file", formData.productImage);
+        cloudinaryData.append("upload_preset", "myupload"); // Replace with actual
+        cloudinaryData.append("cloud_name", "dqxsgmf33"); // Replace with actual
+
+        const cloudinaryRes = await axios.post(
+          "https://api.cloudinary.com/v1_1/dqxsgmf33/image/upload",
+          cloudinaryData
+        );
+
+        imageUrl = cloudinaryRes?.data?.secure_url;
+      }
+
+      const productPayload = {
         Vendor: vendorId,
         ProductName: formData.productName,
         ProductPrice: formData.price,
@@ -73,10 +90,15 @@ const AddProductForm = () => {
         ProductTags: formData.tags,
         ProductCategory: formData.category,
         ProductSubCategory: formData.subCategory,
-        ProductLocation: formData.location || "",
-      });
+        ProductLocation: formData.location,
+        ProductUrl: imageUrl,
+      };
+
+      await axios.post("https://backend-d6mx.vercel.app/addproduct", productPayload);
 
       alert("Product submitted successfully!");
+      console.log(productPayload)
+
       navigate(`/vendor/${vendorId}/products`);
     } catch (error) {
       console.error("Error submitting product:", error);
@@ -86,12 +108,11 @@ const AddProductForm = () => {
 
   return (
     <div>
-      
       <Navbar
         homeLabel="Home"
         homeUrl={`/Product/${id}`}
         jobsLabel="Products"
-        jobsUrl={`/product/${id}/ViewProduct"`}
+        jobsUrl={`/product/${id}/ViewProduct`}
         historyLabel="New Orders"
         historyUrl={`/product/${id}/order`}
         earningsLabel="Order History"
@@ -136,11 +157,7 @@ const AddProductForm = () => {
                 value={formData.category}
                 onChange={(e) => {
                   handleInputChange(e);
-                  setFormData({
-                    ...formData,
-                    category: e.target.value,
-                    subCategory: "", // Reset subcategory when category changes
-                  });
+                  setFormData({ ...formData, category: e.target.value, subCategory: "" });
                 }}
                 required
               >
@@ -172,7 +189,7 @@ const AddProductForm = () => {
             </div>
 
             <div className="col-md-3 mb-3">
-              <label>Price ($) *</label>
+              <label>Price *</label>
               <input
                 type="number"
                 className="form-control"
@@ -184,7 +201,7 @@ const AddProductForm = () => {
             </div>
 
             <div className="col-md-3 mb-3">
-              <label>Stock Quantity *</label>
+              <label>Stock *</label>
               <input
                 type="number"
                 className="form-control"
@@ -218,7 +235,7 @@ const AddProductForm = () => {
             </div>
 
             <div className="col-md-12 mb-3">
-              <label>Product Description *</label>
+              <label>Description *</label>
               <textarea
                 className="form-control"
                 name="description"
@@ -228,25 +245,20 @@ const AddProductForm = () => {
                 required
               />
             </div>
+
             <div className="col-md-12 mb-3">
-  <label htmlFor="productImage">Add Product Image</label><br />
-  <input 
-    type="file" 
-    className="form-control" 
-    id="productImage" 
-    name="productImage" 
-    accept="image/*"
-  />
-</div>
+              <label>Product Image *</label>
+              <input
+                type="file"
+                className="form-control"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </div>
 
             <div className="d-flex gap-2">
-              <button type="reset" className="btn btn-secondary">
-                Reset Form
-              </button>
-              
-              <button type="submit" className="btn btn-primary">
-                Publish Product
-              </button>
+              <button type="reset" className="btn btn-secondary">Reset Form</button>
+              <button type="submit" className="btn btn-primary">Publish Product</button>
             </div>
           </div>
         </form>

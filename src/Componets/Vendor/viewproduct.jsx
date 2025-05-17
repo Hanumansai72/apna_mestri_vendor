@@ -34,6 +34,7 @@ const ProductList = () => {
           category: product.ProductCategory,
           subcategory: product.ProductSubCategory,
           description: product.ProductDescripition,
+          ProductUrl:product.ProductUrl,
           availability: true,
           status:
             parseInt(product.ProductStock) === 0
@@ -170,7 +171,7 @@ const ProductList = () => {
               <Card className="h-100 shadow-sm">
                 <Card.Img
                   variant="top"
-                  src="https://via.placeholder.com/200x150"
+                  src={product.ProductUrl}
                   alt={product.name}
                 />
                 <Card.Body>

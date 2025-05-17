@@ -71,7 +71,7 @@ export default function LoginPage() {
             onClick={() => setActiveTab("vendor")}
             className={`btn ${activeTab === "vendor" ? "btn-warning text-white" : "btn-light text-secondary"} me-2`}
           >
-            Vendor
+            Professional
           </button>
           <button
             onClick={() => setActiveTab("customer")}
@@ -81,7 +81,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Login Form */}
         <div className="w-100" style={{ maxWidth: "400px" }}>
           <h2 className="mb-4">{activeTab === "vendor" ? "Vendor Login" : "Customer Login"}</h2>
           <form className="mb-3" onSubmit={handleLogin}>
