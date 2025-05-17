@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './navbar';
+import axios from 'axios';
 import {
   BarChart,
   Bar,
@@ -10,7 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const id=localStorage.getItem("vendorId")
+const id = localStorage.getItem("vendorId");
 
 const dataDay = [
   { name: '12AM', sales: 200 },
@@ -38,6 +39,21 @@ const dataMonth = [
 
 function Product() {
   const [view, setView] = useState('week');
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8031/wow`);
+        const allOrders = res.data || {};
+        setOrders(allOrders.all || []);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setOrders([]);
+      }
+    };
+    fetchOrder();
+  }, []);
 
   const getData = () => {
     switch (view) {
@@ -50,58 +66,75 @@ function Product() {
   return (
     <div>
       <Navbar
-  homeLabel="Home"
-  homeUrl={`/Product/${id}`}
-  jobsLabel="Products"
-  jobsUrl={`/product/${id}/ViewProduct`}
-  historyLabel="New Orders"
-  historyUrl={`/product/${id}/order`}
-  earningsLabel="Order History"
-  earningsUrl={`/product/${id}/order/history`}
-/>
-      <div className="container my-4">
-        <div className="row g-3">
-          <div className="col-md-3">
-            <div className="card text-white bg-primary h-100">
-              <div className="card-body">
-                <h6 className="card-title">Total Sales</h6>
-                <h4 className="card-text">₹30,000</h4>
-                <i className="bi bi-graph-up fs-3"></i>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-white bg-success h-100">
-              <div className="card-body">
-                <h6 className="card-title">New Orders</h6>
-                <h4 className="card-text">30</h4>
-                <i className="bi bi-bag fs-3"></i>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-white bg-warning h-100">
-              <div className="card-body">
-                <h6 className="card-title">Pending Shipments</h6>
-                <h4 className="card-text">12</h4>
-                <i className="bi bi-truck fs-3"></i>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-white bg-info h-100">
-              <div className="card-body">
-                <h6 className="card-title">Customer Rating</h6>
-                <h5 className="card-text">4.0/5.0</h5>
-                <small className="text-white-50">(142 Reviews)</small><br />
-                <i className="bi bi-star-fill fs-3"></i>
-              </div>
-            </div>
+        homeLabel="Home"
+        homeUrl={`/Product/${id}`}
+        jobsLabel="Products"
+        jobsUrl={`/product/${id}/ViewProduct`}
+        historyLabel="New Orders"
+        historyUrl={`/product/${id}/order`}
+        earningsLabel="Order History"
+        earningsUrl={`/product/${id}/order/history`}
+      />
+
+      <div className="container mt-4">
+  <div className="row">
+    <div className="col-md-3">
+      <div className="card text-white bg-primary mb-3">
+        <div className="card-body d-flex align-items-center">
+          <i className="bi bi-cart-fill fs-2 me-3"></i>
+          <div>
+            <h6 className="card-title mb-1">Total Orders</h6>
+            <p className="card-text fs-5 mb-0">{orders.length}</p>
           </div>
         </div>
       </div>
+    </div>
 
-      {/* Chart */}
+    <div className="col-md-3">
+      <div className="card text-white bg-success mb-3">
+        <div className="card-body d-flex align-items-center">
+          <i className="bi bi-box-seam fs-2 me-3"></i>
+          <div>
+            <h6 className="card-title mb-1">Delivered</h6>
+            <p className="card-text fs-5 mb-0">
+              {orders.filter(o => o.orderStatus?.toLowerCase() === 'delivered').length}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="col-md-3">
+      <div className="card text-white bg-warning mb-3">
+        <div className="card-body d-flex align-items-center">
+          <i className="bi bi-hourglass-split fs-2 me-3"></i>
+          <div>
+            <h6 className="card-title mb-1">Pending</h6>
+            <p className="card-text fs-5 mb-0">
+              {orders.filter(o => o.orderStatus?.toLowerCase() === 'pending').length}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="col-md-3">
+      <div className="card text-white bg-danger mb-3">
+        <div className="card-body d-flex align-items-center">
+          <i className="bi bi-x-octagon-fill fs-2 me-3"></i>
+          <div>
+            <h6 className="card-title mb-1">Cancelled</h6>
+            <p className="card-text fs-5 mb-0">
+              {orders.filter(o => o.orderStatus?.toLowerCase() === 'cancelled').length}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      {/* Chart Section */}
       <div className="container my-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="fw-bold">Overall Sales Analytics</h5>
@@ -124,7 +157,7 @@ function Product() {
         </div>
       </div>
 
-      {/* Recent Orders Table */}
+      {/* Recent Orders Section */}
       <div className="container mb-5">
         <h5 className="fw-bold mb-3">Recent Orders</h5>
         <div className="table-responsive">
@@ -141,39 +174,43 @@ function Product() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>#1234</td>
-                <td>Wireless Mouse</td>
-                <td>John Doe</td>
-                <td>Apr 22, 2025</td>
-                <td><span className="badge bg-warning">Pending</span></td>
-                <td>₹899</td>
-                <td><a href="/">View Details</a></td>
-              </tr>
-              <tr>
-                <td>#1235</td>
-                <td>USB-C Charger</td>
-                <td>Priya Sharma</td>
-                <td>Apr 21, 2025</td>
-                <td><span className="badge bg-success">Delivered</span></td>
-                <td>₹1,299</td>
-                <td><a href="/">View Details</a></td>
-              </tr>
-              <tr>
-                <td>#1236</td>
-                <td>Laptop Stand</td>
-                <td>Ravi Kumar</td>
-                <td>Apr 20, 2025</td>
-                <td><span className="badge bg-danger">Cancelled</span></td>
-                <td>₹749</td>
-                <td><a href="/">View Details</a></td>
-              </tr>
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center text-muted">No orders found.</td>
+                </tr>
+              ) : (
+                orders.map((order, index) => (
+                  <tr key={index}>
+                    <td>{order._id || 'N/A'}</td>
+                    <td>{order.productName || 'N/A'}</td>
+                    <td>{order.customerId || 'N/A'}</td>
+                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <span className={`badge bg-${getStatusBadgeColor(order.orderStatus)}`}>
+                        {order.orderStatus}
+                      </span>
+                    </td>
+                    <td>₹{order.totalAmount}</td>
+                    <td><a href={`/order/${order._id}`}>View Details</a></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
     </div>
   );
+}
+
+// Utility function to get status color
+function getStatusBadgeColor(status) {
+  switch ((status || '').toLowerCase()) {
+    case 'pending': return 'warning';
+    case 'delivered': return 'success';
+    case 'cancelled': return 'danger';
+    default: return 'secondary';
+  }
 }
 
 export default Product;

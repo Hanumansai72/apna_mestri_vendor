@@ -15,6 +15,17 @@ function VendorProfileSettings() {
     Tax_ID: '',
     Password: ''
   });
+  
+  const handleSaveChanges = async () => {
+  try {
+    const res = await axios.put(`http://localhost:8031/update/userdetailes/${id}`, formdata);
+    alert("Changes saved successfully");
+    console.log(res)
+  } catch (err) {
+    console.error("Failed to save changes", err);
+    alert("Failed to save changes");
+  }
+};
 
   const id = localStorage.getItem("vendorId");
 
@@ -123,6 +134,7 @@ function VendorProfileSettings() {
               name="Category"
               value={formdata.Category}
               onChange={handleChange}
+              readOnly
             />
           </div>
           <div className="col-md-6">
@@ -133,6 +145,7 @@ function VendorProfileSettings() {
               name="Sub_Category"
               value={formdata.Sub_Category}
               onChange={handleChange}
+              readOnly
             />
           </div>
         </div>
@@ -165,7 +178,7 @@ function VendorProfileSettings() {
           </div>
         </div>
 
-        <button className="btn btn-primary">Save Changes</button>
+        <button className="btn btn-primary" onClick={handleSaveChanges}>Save Changes</button>
       </div>
     </div>
   );

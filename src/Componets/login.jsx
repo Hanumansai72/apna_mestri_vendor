@@ -77,7 +77,7 @@ export default function LoginPage() {
             onClick={() => setActiveTab("customer")}
             className={`btn ${activeTab === "customer" ? "btn-warning text-white" : "btn-light text-secondary"}`}
           >
-            Customer
+            Product
           </button>
         </div>
 
@@ -98,6 +98,7 @@ export default function LoginPage() {
               <label className="form-label">Password</label>
               <input
                 type="password"
+                
                 value={password}
                 className="form-control"
                 placeholder="********"

@@ -13,11 +13,15 @@ function Navbar({
   earningsUrl
 }) {
   const { id } = useParams();
+  function signout(){
+    localStorage.removeItem("vendorId");
+    navigate("/login")
+  }
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!id) navigate('/vendor/login');
+    if (!id) navigate('/login');
   }, [id, navigate]);
 
   const defaultVendorId = localStorage.getItem("vendorId");
@@ -91,7 +95,7 @@ function Navbar({
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">
                   <li><Link to={profileUrl} className="dropdown-item">My Profile</Link></li>
-                  <li><Link to="/settings" className="dropdown-item">Sign Out</Link></li>
+                  <li className="dropdown-item" onClick={signout}>Sign Out</li>
                 </ul>
               </div>
             </div>
