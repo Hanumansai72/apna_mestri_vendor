@@ -86,7 +86,7 @@ const AddProductForm = () => {
         ProductName: formData.productName,
         ProductPrice: formData.price,
         ProductStock: formData.stock,
-        Description: formData.description,
+        ProductDescription: formData.description,
         ProductTags: formData.tags,
         ProductCategory: formData.category,
         ProductSubCategory: formData.subCategory,
