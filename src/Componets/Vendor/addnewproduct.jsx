@@ -70,7 +70,7 @@ const AddProductForm = () => {
       if (formData.productImage) {
         const cloudinaryData = new FormData();
         cloudinaryData.append("file", formData.productImage);
-        cloudinaryData.append("upload_preset", "myupload"); // Replace with actual
+        cloudinaryData.append("upload_preset", "myupload"); 
         cloudinaryData.append("cloud_name", "dqxsgmf33"); // Replace with actual
 
         const cloudinaryRes = await axios.post(
@@ -86,7 +86,7 @@ const AddProductForm = () => {
         ProductName: formData.productName,
         ProductPrice: formData.price,
         ProductStock: formData.stock,
-        ProductDescription: formData.description,
+        Description: formData.description,
         ProductTags: formData.tags,
         ProductCategory: formData.category,
         ProductSubCategory: formData.subCategory,
