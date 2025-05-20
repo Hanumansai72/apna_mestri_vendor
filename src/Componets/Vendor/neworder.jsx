@@ -39,7 +39,7 @@ const NewHistory = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(`https://backend-d6mx.vercel.app/pending-orders`);
+        const res = await axios.get(`https://backend-d6mx.vercel.app/pending-orders/${id}`);
 
         const allOrders = Array.isArray(res.data.orders)
           ? res.data.orders
@@ -112,7 +112,7 @@ const NewHistory = () => {
                   <td>{order._id}</td>
                   <td>{order.customerName || 'N/A'}</td>
                   <td>{order.productName || 'N/A'}</td>
-                  <td>{formatDate(order.createdAt)}</td>
+                  <td>{formatDate(order.orderedAt)}</td>
                   <td>{StatusBadge(order.orderStatus)}</td>
                   <td>{order.quantity}</td>
                   <td>₹{(order.pricePerUnit * order.quantity).toLocaleString()}</td>
@@ -147,7 +147,7 @@ const NewHistory = () => {
                 <div className="mb-3 d-flex justify-content-between">
                   <div>
                     <strong>Order Placed On:</strong>
-                    <div>{formatDate(selectedOrder.createdAt)}</div>
+                    <div>{formatDate(selectedOrder.orderedAt)}</div>
                   </div>
                   <div>
                     <strong>Expected Delivery:</strong>

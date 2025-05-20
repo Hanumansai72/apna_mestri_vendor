@@ -124,13 +124,13 @@ export default function LoginPage() {
           </button>
 
           <p className="text-center mt-3 small">
-            Don't have an account? <a href="/vendor/register" className="text-warning">Create Account</a>
+            Don't have an account? <a href="/signup" className="text-warning">Create Account</a>
           </p>
         </div>
       </div>
 
       {/* Right side illustration panel */}
-      <div className="w-50 d-flex justify-content-center align-items-center bg-light">
+      <div className="w-50 d-flex justify-content-center align-items-center bg-light d-none d-md-flex">
         <div className="text-center" style={{ maxWidth: "400px" }}>
           <img
             src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c8dd26861f-39ad2f8afe79905fbe9e.png"

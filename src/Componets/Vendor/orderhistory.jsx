@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
+import { Table, Badge, Button, Form, Row, Col, Pagination, Image } from 'react-bootstrap';
 import Navbar from './navbar';
 import axios from 'axios';
 
@@ -15,22 +15,23 @@ const OrderHistory = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`https://backend-d6mx.vercel.app/wow`);
+        const res = await axios.get(`https://backend-d6mx.vercel.app/wow/${id}`);
         const allOrders = res.data.all || [];
         setOrders(allOrders);
+        console.log(res.data.all);
       } catch (err) {
         console.error("Error fetching orders:", err);
       }
     };
     fetchOrder();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     let filtered = [...orders];
-
     const now = new Date();
+
     filtered = filtered.filter(order => {
-      const orderDate = new Date(order.createdAt);
+      const orderDate = new Date(order.orderedAt);
       if (dateFilter === "Last 7 days") {
         return now - orderDate <= 7 * 24 * 60 * 60 * 1000;
       } else if (dateFilter === "Last 30 days") {
@@ -53,7 +54,7 @@ const OrderHistory = () => {
       const lowerSearch = searchQuery.toLowerCase();
       filtered = filtered.filter(order =>
         (order._id || "").toLowerCase().includes(lowerSearch) ||
-        (order.vendorId || "").toLowerCase().includes(lowerSearch) ||
+        (order.customerName || "").toLowerCase().includes(lowerSearch) ||
         (order.productId || "").toLowerCase().includes(lowerSearch)
       );
     }
@@ -132,8 +133,8 @@ const OrderHistory = () => {
           <thead className="table-light">
             <tr>
               <th>Order ID</th>
-              <th>Vendor ID</th>
-              <th>Product ID</th>
+              <th>Product</th>
+              <th>Customer Name</th>
               <th>Quantity</th>
               <th>Price/Unit</th>
               <th>Total</th>
@@ -149,11 +150,16 @@ const OrderHistory = () => {
               filteredOrders.map((order, index) => (
                 <tr key={index}>
                   <td>{order._id}</td>
-                  <td>{order.vendorId}</td>
-                  <td>{order.productId}</td>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <Image src={order.productImage} alt={order.productName} width={50} height={50} rounded className="me-2" />
+                      <span>{order.productName}</span>
+                    </div>
+                  </td>
+                  <td>{order.customerName}</td>
                   <td>{order.quantity}</td>
                   <td>₹{order.pricePerUnit}</td>
-                  <td>₹{order.totalAmount}</td>
+                  <td>₹{order.totalPrice}</td>
                   <td><StatusBadge status={order.orderStatus} /></td>
                   <td>
                     <Badge bg={
@@ -164,7 +170,7 @@ const OrderHistory = () => {
                       {order.paymentStatus}
                     </Badge>
                   </td>
-                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(order.orderedAt).toLocaleDateString()}</td>
                 </tr>
               ))
             )}
