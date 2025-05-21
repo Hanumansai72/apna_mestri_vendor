@@ -8,26 +8,40 @@ const id = localStorage.getItem("vendorId");
 
 const StatusBadge = (status) => {
   switch (status) {
-    case 'Delivered':
-      return <Badge bg="success">Delivered</Badge>;
-    case 'Processing':
-      return <Badge bg="info">Processing</Badge>;
-    case 'Pending':
-      return <Badge bg="warning">Pending</Badge>;
-    case 'Cancelled':
-      return <Badge bg="danger">Cancelled</Badge>;
-    default:
-      return <Badge bg="secondary">{status}</Badge>;
+    case 'Delivered': return <Badge bg="success">Delivered</Badge>;
+    case 'Processing': return <Badge bg="info">Processing</Badge>;
+    case 'Pending': return <Badge bg="warning">Pending</Badge>;
+    case 'Cancelled': return <Badge bg="danger">Cancelled</Badge>;
+    default: return <Badge bg="secondary">{status}</Badge>;
   }
 };
 
 const NewHistory = () => {
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orders, setOrders] = useState([]);
+  const [newStatus, setNewStatus] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get(`https://backend-d6mx.vercel.app/pending-orders/${id}`);
+      const data = Array.isArray(res.data) ? res.data : res.data.orders || [];
+      setOrders(data);
+      setFilteredOrders(data);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
+    setNewStatus(order.orderStatus);
     setShowModal(true);
   };
 
@@ -36,33 +50,29 @@ const NewHistory = () => {
     setSelectedOrder(null);
   };
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get(`https://backend-d6mx.vercel.app/pending-orders/${id}`);
+  const handleStatusUpdate = async () => {
+    try {
+      await axios.put(`https://backend-d6mx.vercel.app/update-order-status/${selectedOrder._id}`, {
+        orderStatus: newStatus
+      });
+      handleCloseModal();
+      fetchOrders(); 
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
+  };
 
-        const allOrders = Array.isArray(res.data.orders)
-          ? res.data.orders
-          : Array.isArray(res.data)
-          ? res.data
-          : [];
+  const formatDate = (date) => new Date(date).toLocaleDateString();
 
-        const pendingOrders = allOrders.filter(order =>
-          order.paymentStatus === 'Pending'
-        );
-
-        setOrders(pendingOrders);
-      } catch (err) {
-        console.error("Error fetching new orders:", err);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const lower = query.toLowerCase();
+    const result = orders.filter(o =>
+      o.customerName?.toLowerCase().includes(lower) ||
+      o.productName?.toLowerCase().includes(lower) ||
+      o._id?.toLowerCase().includes(lower)
+    );
+    setFilteredOrders(result);
   };
 
   return (
@@ -84,16 +94,13 @@ const NewHistory = () => {
         </div>
 
         <Row className="mb-3">
-          <Col md={3}><Form.Select><option>Last 30 days</option></Form.Select></Col>
-          <Col md={3}><Form.Select><option>All statuses</option></Form.Select></Col>
-          <Col md={3}><Form.Select><option>All clients</option></Form.Select></Col>
-          <Col md={3}><Form.Control placeholder="Search orders..." /></Col>
+          <Col><Form.Control placeholder="Search..." value={searchQuery} onChange={e => handleSearch(e.target.value)} /></Col>
         </Row>
 
-        {orders.length === 0 ? (
-          <div className="alert alert-info">No pending payment orders available.</div>
+        {filteredOrders.length === 0 ? (
+          <div className="alert alert-info">No pending orders.</div>
         ) : (
-          <Table responsive bordered hover className="job-table">
+          <Table responsive bordered hover>
             <thead className="table-light">
               <tr>
                 <th>Order ID</th>
@@ -107,17 +114,17 @@ const NewHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order, index) => (
-                <tr key={index}>
+              {filteredOrders.map((order, idx) => (
+                <tr key={idx}>
                   <td>{order._id}</td>
-                  <td>{order.customerName || 'N/A'}</td>
-                  <td>{order.productName || 'N/A'}</td>
+                  <td>{order.customerName}</td>
+                  <td>{order.productName}</td>
                   <td>{formatDate(order.orderedAt)}</td>
                   <td>{StatusBadge(order.orderStatus)}</td>
                   <td>{order.quantity}</td>
-                  <td>₹{(order.pricePerUnit * order.quantity).toLocaleString()}</td>
+                  <td>₹{order.totalPrice}</td>
                   <td>
-                    <Button variant="outline-secondary" size="sm" onClick={() => handleViewDetails(order)}>
+                    <Button size="sm" variant="outline-primary" onClick={() => handleViewDetails(order)}>
                       📋 View
                     </Button>
                   </td>
@@ -128,12 +135,8 @@ const NewHistory = () => {
         )}
 
         <Pagination className="justify-content-end">
-          <Pagination.First />
-          <Pagination.Prev />
           <Pagination.Item active>1</Pagination.Item>
           <Pagination.Item>2</Pagination.Item>
-          <Pagination.Next />
-          <Pagination.Last />
         </Pagination>
 
         {/* Modal */}
@@ -143,57 +146,28 @@ const NewHistory = () => {
           </Modal.Header>
           <Modal.Body>
             {selectedOrder && (
-              <div className="p-3">
-                <div className="mb-3 d-flex justify-content-between">
-                  <div>
-                    <strong>Order Placed On:</strong>
-                    <div>{formatDate(selectedOrder.orderedAt)}</div>
-                  </div>
-                  <div>
-                    <strong>Expected Delivery:</strong>
-                    <div>{selectedOrder.expectedDeliveryDate ? formatDate(selectedOrder.expectedDeliveryDate) : 'N/A'}</div>
-                  </div>
-                </div>
+              <>
+                <h5>{selectedOrder.productName}</h5>
+                <p><strong>Customer:</strong> {selectedOrder.customerName}</p>
+                <p><strong>Quantity:</strong> {selectedOrder.quantity}</p>
+                <p><strong>Shipping:</strong> {selectedOrder.shippingAddress?.fullAddress}</p>
 
-                <div className="border rounded p-3 mb-3">
-                  <h6>📦 Product Details</h6>
-                  <Row>
-                    <Col md={6}><strong>Product Name:</strong><div>{selectedOrder.productName}</div></Col>
-                    <Col md={6}><strong>Quantity:</strong><div>{selectedOrder.quantity} Units</div></Col>
-                    <Col md={6} className="mt-2"><strong>Unit Price:</strong><div>₹{selectedOrder.pricePerUnit?.toFixed(2)}</div></Col>
-                    <Col md={6} className="mt-2"><strong>Total:</strong><div>₹{(selectedOrder.pricePerUnit * selectedOrder.quantity).toLocaleString()}</div></Col>
-                  </Row>
-                </div>
-
-                <div className="border rounded p-3 mb-3">
-                  <h6>🏠 Delivery Details</h6>
-                  <strong>Shipping Address:</strong>
-                  <div>
-                    {selectedOrder.shippingAddress
-                      ? `${selectedOrder.shippingAddress.street}, ${selectedOrder.shippingAddress.city}, ${selectedOrder.shippingAddress.state}, ${selectedOrder.shippingAddress.pincode}, ${selectedOrder.shippingAddress.country}`
-                      : 'N/A'}
-                  </div>
-                  <div className="mt-2">
-                    <strong>Special Instructions:</strong>
-                    <div>{selectedOrder.notes || 'None'}</div>
-                  </div>
-                </div>
-
-                <div className="border rounded p-3">
-                  <h6>👤 Customer Info</h6>
-                  <Row>
-                    <Col md={6}><strong>Name:</strong><div>{selectedOrder.customerName}</div></Col>
-                    <Col md={6}><strong>Contact:</strong><div>{selectedOrder.contact || '--'}</div></Col>
-                  </Row>
-                </div>
-              </div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Change Order Status</Form.Label>
+                  <Form.Select value={newStatus} onChange={e => setNewStatus(e.target.value)}>
+                    <option>Pending</option>
+                    <option>Processing</option>
+                    <option>Shipped</option>
+                    <option>Delivered</option>
+                    <option>Cancelled</option>
+                  </Form.Select>
+                </Form.Group>
+              </>
             )}
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="danger" onClick={handleCloseModal}>Reject Order</Button>
-            <Link to="/vendor/payment" className="Linkers">
-              <Button variant="success" onClick={handleCloseModal}>Accept Order</Button>
-            </Link>
+            <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
+            <Button variant="primary" onClick={handleStatusUpdate}>Update Status</Button>
           </Modal.Footer>
         </Modal>
       </div>

@@ -11,20 +11,23 @@ const OrderHistory = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [clientFilter, setClientFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`https://backend-d6mx.vercel.app/wow/${id}`);
+        const res = await axios.get(`https://backend-d6mx.vercel.app/wow/${id}?page=${currentPage}&limit=${itemsPerPage}`);
         const allOrders = res.data.all || [];
         setOrders(allOrders);
-        console.log(res.data.all);
+        setTotalOrders(res.data.total || 0);
       } catch (err) {
         console.error("Error fetching orders:", err);
       }
     };
     fetchOrder();
-  }, [id]);
+  }, [id, currentPage]);
 
   useEffect(() => {
     let filtered = [...orders];
@@ -62,6 +65,10 @@ const OrderHistory = () => {
     setFilteredOrders(filtered);
   }, [orders, dateFilter, statusFilter, clientFilter, searchQuery]);
 
+  useEffect(() => {
+    setCurrentPage(1); // Reset page on filter change
+  }, [dateFilter, statusFilter, clientFilter, searchQuery]);
+
   const StatusBadge = ({ status }) => {
     switch (status) {
       case 'Delivered': return <Badge bg="success">Delivered</Badge>;
@@ -73,6 +80,7 @@ const OrderHistory = () => {
   };
 
   const clientOptions = Array.from(new Set(orders.map(o => o.customerName))).filter(Boolean);
+  const totalPages = Math.ceil(totalOrders / itemsPerPage);
 
   return (
     <div>
@@ -177,13 +185,21 @@ const OrderHistory = () => {
           </tbody>
         </Table>
 
+        {/* Pagination */}
         <Pagination className="justify-content-end">
-          <Pagination.First />
-          <Pagination.Prev />
-          <Pagination.Item active>1</Pagination.Item>
-          <Pagination.Item>2</Pagination.Item>
-          <Pagination.Next />
-          <Pagination.Last />
+          <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+          <Pagination.Prev onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} />
+          {Array.from({ length: totalPages }, (_, i) => (
+            <Pagination.Item
+              key={i + 1}
+              active={currentPage === i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </Pagination.Item>
+          ))}
+          <Pagination.Next onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} />
+          <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
         </Pagination>
       </div>
     </div>

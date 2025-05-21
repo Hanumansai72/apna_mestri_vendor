@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("vendor");
@@ -47,25 +49,25 @@ export default function LoginPage() {
         console.log("Login response:", res.data);
 
         if (res.data.message === "Success") {
-          alert("Login successful");
+          toast.success("Login successful");
           const id = res.data.vendorId;
           localStorage.setItem("vendorId", id);
-          setVendorId(id); // Triggers category fetch
+          setVendorId(id);
         } else {
-          alert("Login failed. Please check credentials.");
+          toast.error("Login failed. Please check credentials.");
           navigate("/vendor/register");
         }
       })
       .catch((err) => {
         console.error("Login error:", err);
-        alert("Server error during login.");
+        toast.error("Server error during login.");
       });
   };
 
   return (
-    <div className="d-flex vh-100">
-      <div className="w-50 d-flex flex-column justify-content-center align-items-center p-4">
-        {/* Tabs */}
+    <div className="d-flex vh-100 flex-column flex-md-row">
+      <ToastContainer />
+      <div className="w-100 w-md-50 d-flex flex-column justify-content-center align-items-center p-4">
         <div className="d-flex mb-4">
           <button
             onClick={() => setActiveTab("vendor")}
@@ -81,10 +83,10 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="w-100" style={{ maxWidth: "400px" }}>
+        <div className="w-100 px-3" style={{ maxWidth: "500px" }}>
           <h2 className="mb-4">{activeTab === "vendor" ? "Vendor Login" : "Customer Login"}</h2>
-          <form className="mb-3" onSubmit={handleLogin}>
-            <div className="mb-3">
+          <form className="mb-3 w-100" onSubmit={handleLogin}>
+            <div className="mb-3 w-100">
               <label className="form-label">Email Address</label>
               <input
                 type="email"
@@ -92,17 +94,18 @@ export default function LoginPage() {
                 className="form-control"
                 placeholder="you@example.com"
                 onChange={(e) => setUsername(e.target.value)}
+                required
               />
             </div>
-            <div className="mb-3">
+            <div className="mb-3 w-100">
               <label className="form-label">Password</label>
               <input
                 type="password"
-                
                 value={password}
                 className="form-control"
                 placeholder="********"
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -129,8 +132,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right side illustration panel */}
-      <div className="w-50 d-flex justify-content-center align-items-center bg-light d-none d-md-flex">
+      <div className="w-50 d-none d-md-flex justify-content-center align-items-center bg-light">
         <div className="text-center" style={{ maxWidth: "400px" }}>
           <img
             src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c8dd26861f-39ad2f8afe79905fbe9e.png"
