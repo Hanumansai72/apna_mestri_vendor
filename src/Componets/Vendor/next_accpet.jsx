@@ -7,7 +7,6 @@ import axios from 'axios';
 
 const JobInProgress = () => {
   const address = "medipally";
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
   const currentStep = 2;
   const isStepActive = (step) => step <= currentStep;

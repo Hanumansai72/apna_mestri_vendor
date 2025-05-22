@@ -1,20 +1,8 @@
-import React, { useState } from 'react';
-import { Table, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Table, Badge, Button, Form, Row, Col, Pagination, Modal } from 'react-bootstrap';
 import Navbar from './navbar';
 import './jobhistory.css';
-
-const allJobs = [
-  { id: '#JOB-2025-104', client: 'TechSolutions Inc.', initials: 'TS', service: 'Network Installation', date: '2025-04-15', status: 'Completed', rating: 5, earnings: 1250 },
-  { id: '#JOB-2025-098', client: 'Global Innovations', initials: 'GI', service: 'Database Migration', date: '2025-04-10', status: 'In Progress', rating: null, earnings: 850 },
-  { id: '#JOB-2025-087', client: 'Digital Pioneers', initials: 'DP', service: 'Cloud Infrastructure', date: '2025-04-05', status: 'Completed', rating: 4, earnings: 2100 },
-  { id: '#JOB-2025-076', client: 'TechSolutions Inc.', initials: 'TS', service: 'Security Audit', date: '2025-03-28', status: 'Cancelled', rating: null, earnings: 0 },
-  { id: '#JOB-2025-065', client: 'Global Innovations', initials: 'GI', service: 'DevOps Consulting', date: '2025-03-22', status: 'Completed', rating: 4.5, earnings: 1750 },
-  { id: '#JOB-2025-055', client: 'Alpha Dynamics', initials: 'AD', service: 'Software Development', date: '2025-03-15', status: 'Completed', rating: 5, earnings: 3000 },
-  { id: '#JOB-2025-044', client: 'Digital Pioneers', initials: 'DP', service: 'Mobile App Setup', date: '2025-02-25', status: 'In Progress', rating: null, earnings: 1200 },
-  { id: '#JOB-2025-034', client: 'NextGen Tech', initials: 'NT', service: 'Web Hosting', date: '2025-02-20', status: 'Completed', rating: 4, earnings: 700 },
-  { id: '#JOB-2025-023', client: 'TechSolutions Inc.', initials: 'TS', service: 'Server Setup', date: '2025-02-05', status: 'Completed', rating: 5, earnings: 1900 },
-  { id: '#JOB-2025-012', client: 'Global Innovations', initials: 'GI', service: 'Backup Solutions', date: '2025-01-18', status: 'Cancelled', rating: null, earnings: 0 },
-];
+import axios from 'axios';
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -45,21 +33,44 @@ const getStars = (rating) => {
 };
 
 const JobHistory = () => {
+  const [allJobs, setAllJobs] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
   const [clientFilter, setClientFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('Last 30 days');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // New modal-related state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+
   const jobsPerPage = 5;
 
-  // Filtered Data
+  const vendorId = localStorage.getItem('vendorId'); // Adjust if using context or props
+
+  useEffect(() => {
+    const fetchCompletedJobs = async () => {
+      try {
+        const response = await axios.get(`https://backend-d6mx.vercel.app/jobhistry/${vendorId}`);
+        setAllJobs(response.data);
+      } catch (error) {
+        console.error("Error fetching job history:", error);
+      }
+    };
+
+    if (vendorId) {
+      fetchCompletedJobs();
+    }
+  }, [vendorId]);
+
   const filteredJobs = allJobs.filter((job) => {
     const matchesStatus = statusFilter === 'All' || job.status === statusFilter;
-    const matchesClient = clientFilter === 'All' || job.client === clientFilter;
-    const matchesSearch = job.id.toLowerCase().includes(searchTerm.toLowerCase()) || job.client.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClient = clientFilter === 'All' || job.customer?.fullName === clientFilter;
+    const matchesSearch =
+      job._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.customer?.fullName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const jobDate = new Date(job.date);
+    const jobDate = new Date(job.serviceDate);
     const now = new Date();
     let matchesDate = true;
     if (dateFilter === 'Last 30 days') {
@@ -77,14 +88,24 @@ const JobHistory = () => {
     return matchesStatus && matchesClient && matchesDate && matchesSearch;
   });
 
-  // Pagination logic
   const indexOfLastJob = currentPage * jobsPerPage;
   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
   const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
-
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Open modal and set selected job
+  const handleShowDetails = (job) => {
+    setSelectedJob(job);
+    setShowModal(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedJob(null);
+  };
 
   return (
     <div>
@@ -114,15 +135,17 @@ const JobHistory = () => {
           <Col md={3}>
             <Form.Select value={clientFilter} onChange={(e) => setClientFilter(e.target.value)}>
               <option>All</option>
-              <option>TechSolutions Inc.</option>
-              <option>Global Innovations</option>
-              <option>Digital Pioneers</option>
-              <option>Alpha Dynamics</option>
-              <option>NextGen Tech</option>
+              {[...new Set(allJobs.map(job => job.customer?.fullName))].map((client, idx) => (
+                <option key={idx}>{client}</option>
+              ))}
             </Form.Select>
           </Col>
           <Col md={3}>
-            <Form.Control placeholder="Search jobs..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <Form.Control
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </Col>
         </Row>
 
@@ -131,30 +154,33 @@ const JobHistory = () => {
             <tr>
               <th>Job ID</th>
               <th>Client</th>
-              <th>Service Type</th>
-              <th>Date</th>
+              <th>Service Date</th>
+              <th>Time</th>
               <th>Status</th>
               <th>Rating</th>
-              <th>Earnings</th>
+              <th>Amount</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentJobs.length > 0 ? currentJobs.map((job, index) => (
               <tr key={index}>
-                <td><a href="/" className='ID_job'>{job.id}</a></td>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <div className="client-avatar me-2">{job.initials}</div>
-                    {job.client}
-                  </div>
-                </td>
-                <td>{job.service}</td>
-                <td>{new Date(job.date).toLocaleDateString()}</td>
+                <td><a href="/" className='ID_job'>{job._id}</a></td>
+                <td>{job.customer?.fullName || 'N/A'}</td>
+                <td>{new Date(job.serviceDate).toLocaleDateString()}</td>
+                <td>{job.serviceTime}</td>
                 <td>{getStatusBadge(job.status)}</td>
-                <td>{getStars(job.rating)}</td>
-                <td>${job.earnings.toLocaleString()}</td>
-                <td><Button variant="outline-secondary" size="sm">📋</Button></td>
+                <td>{getStars(job.rating || null)}</td>
+                <td>₹{job.totalAmount.toFixed(2)}</td>
+                <td>
+                  <Button 
+                    variant="outline-secondary" 
+                    size="sm" 
+                    onClick={() => handleShowDetails(job)}
+                  >
+                    📋
+                  </Button>
+                </td>
               </tr>
             )) : (
               <tr>
@@ -175,8 +201,38 @@ const JobHistory = () => {
           <Pagination.Next onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />
           <Pagination.Last onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />
         </Pagination>
-
       </div>
+
+      {/* Modal for Job Details */}
+      <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Job Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedJob ? (
+            <>
+              <h5>Job ID: {selectedJob._id}</h5>
+              <p><strong>Client Name:</strong> {selectedJob.customer?.fullName || 'N/A'}</p>
+              <p><strong>Phone:</strong> {selectedJob.customer?.phone || 'N/A'}</p>
+              <p><strong>Email:</strong> {selectedJob.customer?.email || 'N/A'}</p>
+              <p><strong>Service Date:</strong> {new Date(selectedJob.serviceDate).toLocaleDateString()}</p>
+              <p><strong>Service Time:</strong> {selectedJob.serviceTime}</p>
+              <p><strong>Status:</strong> {getStatusBadge(selectedJob.status)}</p>
+              <p><strong>Rating:</strong> {getStars(selectedJob.rating || null)}</p>
+              <p><strong>Total Amount:</strong> ₹{selectedJob.totalAmount.toFixed(2)}</p>
+              <p><strong>Address:</strong> {selectedJob.customer?.address || 'N/A'}</p>
+              {/* Add any other fields you want here */}
+            </>
+          ) : (
+            <p>Loading details...</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

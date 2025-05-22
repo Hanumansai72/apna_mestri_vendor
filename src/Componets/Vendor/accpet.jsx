@@ -35,7 +35,7 @@ const JobListings = () => {
 
  const handleActionClick = async (jobId, newStatus) => {
   try {
-    const res = await axios.put(`http://localhost:8031/api/bookings/${jobId}/status`, {
+    const res = await axios.put(`https://backend-d6mx.vercel.app/api/bookings/${jobId}/status`, {
       status: newStatus,
     });
 

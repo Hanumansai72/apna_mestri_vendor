@@ -5,6 +5,9 @@ import axios from 'axios';
 
 function TechnicalNonDashboard() {
     const { id } = useParams(); 
+    const [count,setcount]=useState()
+    
+    
 
     const [locationName, setLocationName] = useState("Fetching location...");
     const [distance, setDistance] = useState(null);
@@ -19,7 +22,18 @@ function TechnicalNonDashboard() {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
+useEffect(()=>{
+    axios.get(`https://backend-d6mx.vercel.app/count/service/${id}`
 
+    )
+    .then(res=>{
+        setcount(res.data)
+        console.log(res.data)
+    })
+    .catch(err=>{
+        console.log(err)
+    })
+},[id])
     async function getCoordinatesFromCity(cityName) {
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?city=${cityName}&state=Telangana&country=India&format=json&addressdetails=1`);
@@ -62,6 +76,8 @@ function TechnicalNonDashboard() {
 
         console.log("Vendor ID:", id);
     }, [id]);
+    const Pendings=12
+    const completeds=12
 
     return (
         <div>
@@ -71,10 +87,9 @@ function TechnicalNonDashboard() {
             <div className="container mt-4">
                 <div className="row g-3">
                     {[
-                        { title: "New Jobs", count: 12, icon: "bi-briefcase-fill" },
-                        { title: "Pending Jobs", count: 8, icon: "bi-clock-fill" },
-                        { title: "Completed Jobs", count: 30, icon: "bi-check-circle-fill" },
-                        { title: "Cancelled", count: 2, icon: "bi-x-circle-fill" },
+                        { title: "New Jobs", count: count?.count1, icon: "bi-briefcase-fill" },
+                        { title: "Pending Jobs", count: count?.count1, icon: "bi-clock-fill" },
+                        { title: "Completed Jobs", count:count?.count2, icon: "bi-check-circle-fill" },
                     ].map((item, i) => (
                         <div className="col-md-3" key={i}>
                             <div className="card text-center shadow-sm">
