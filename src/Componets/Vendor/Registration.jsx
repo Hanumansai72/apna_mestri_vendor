@@ -49,29 +49,33 @@ function Registration() {
   };
 
   const handleLocateMe = () => {
-    if (!navigator.geolocation) return toast.error("Geolocation not supported");
+  if (!navigator.geolocation) return toast.error("Geolocation not supported");
 
-    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-      const { latitude, longitude } = coords;
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-        const data = await res.json();
-        const address = data.display_name || "";
-        const state = data.address?.state || "";
-        const city = data.address?.city || data.address?.town || data.address?.village || "";
-        const postcode = data.address?.postcode || "";
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    const { latitude, longitude } = coords;
 
-        setFormData(prev => ({
-          ...prev,
-          Business_address: `${address}, ${city}, ${state} - ${postcode}`,
-          Latitude: latitude.toString(),
-          Longitude: longitude.toString()
-        }));
-      } catch {
-        toast.error("Location fetch failed");
-      }
-    }, () => toast.error("Location access denied"));
-  };
+    try {
+      const apiKey = 'pk.b6ebdeccc1f35c3e45b72aba8fec713c'; // Replace with your actual API key
+      const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${latitude}&lon=${longitude}&format=json`);
+      const data = await res.json();
+
+      const address = data.display_name || "";
+      const state = data.address?.state || "";
+      const city = data.address?.city || data.address?.town || data.address?.village || "";
+      const postcode = data.address?.postcode || "";
+
+      setFormData(prev => ({
+        ...prev,
+        Business_address: `${address}, ${city}, ${state} - ${postcode}`,
+        Latitude: latitude.toString(),
+        Longitude: longitude.toString()
+      }));
+    } catch (error) {
+      toast.error("Location fetch failed");
+      console.error(error);
+    }
+  }, () => toast.error("Location access denied"));
+};
 
   const uploadImageToCloudinary = async () => {
     const data = new FormData();
