@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from './navbar';
+import axios from 'axios';
 
 const JobInProgress = () => {
   const address = "medipally";
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
   const currentStep = 2;
-
   const isStepActive = (step) => step <= currentStep;
 
   const price = "$120.00";
@@ -18,11 +18,23 @@ const JobInProgress = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
-  const { id } = useParams(); // Get the dynamic ID from the URL
-  const navigate = useNavigate(); // Navigation hook
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const handleCloseModal = () => setShowModal(false);
   const handleShowModal = () => setShowModal(true);
+
+  const [jobs, setJobs] = useState([]);
+  const vendorId = localStorage.getItem("JObid");
+
+  useEffect(() => {
+    axios.get(`https://backend-d6mx.vercel.app/services/jobs/${vendorId}`)
+      .then(res => {
+        console.log(res.data);
+        setJobs(res.data);
+      })
+      .catch(err => console.error('Error fetching jobs:', err));
+  }, [vendorId]);
 
   const handleOtpChange = (e, index) => {
     const newOtp = [...otp];
@@ -42,6 +54,27 @@ const JobInProgress = () => {
       alert('Invalid OTP, please try again.');
     }
   };
+
+
+  // Extract location info safely with optional chaining
+  const latitude = jobs?.address?.latitude;
+  const longitude = jobs?.address?.longitude;
+  const location = jobs?.address?.city;
+  const fullNames = jobs?.customer?.fullName;
+
+  // Format service date and time
+  const serviceDate = jobs?.serviceDate;
+  const serviceTime = jobs?.serviceTime;
+  const paymentmode=jobs?.payment?.method;        
+
+
+  const formattedDate = serviceDate
+    ? new Date(serviceDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : '';
 
   return (
     <div>
@@ -83,16 +116,23 @@ const JobInProgress = () => {
             {/* Map Section */}
             <div className="mb-4">
               <div className="position-relative">
-                <img
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/b49dc69bc9-06f25dad2193d7eddaa0.png"
-                  alt="Map"
-                  className="img-fluid rounded"
-                  style={{ width: '100%', height: '250px', objectFit: 'cover' }}
-                />
+                {jobs && (
+                  <iframe
+                    width="600"
+                    height="450"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    className='w-100'
+                    src={`https://www.google.com/maps?q=${latitude},${longitude}&hl=en&z=14&output=embed`}
+                    title="Location Map"
+                  />
+                )}
+
                 <div className="d-flex justify-content-between align-items-center mt-2">
                   <small className="text-muted">2.5 miles away</small>
                   <a
-                    href={googleMapsUrl}
+                    href={`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-outline-primary btn-sm"
@@ -106,7 +146,7 @@ const JobInProgress = () => {
             {/* Service Info */}
             <div className="mb-3">
               <h5>Service Location</h5>
-              <p>{address}</p>
+              <p>{location}</p>
             </div>
 
             {/* Job Info */}
@@ -114,13 +154,16 @@ const JobInProgress = () => {
               <h5>Job Details</h5>
               <ul className="list-group">
                 <li className="list-group-item">
-                  <strong>Customer:</strong> James Wilson <br />
-                  <small>Contact: (999) 123-4562</small>
+                  <strong>Customer:</strong> {fullNames} <br />
                 </li>
                 <li className="list-group-item"><strong>Service Type:</strong> Plumbing - Leak Repair</li>
-                <li className="list-group-item"><strong>Scheduled Time:</strong> April 21, 2025 - 2:00 PM to 4:00 PM</li>
+                <li className="list-group-item">
+                  <strong>Scheduled Time:</strong> {formattedDate} - {serviceTime}
+                </li>
                 <li className="list-group-item"><strong>Job ID:</strong> JOBID-2025-04189</li>
                 <li className="list-group-item"><strong>Price:</strong> {price}</li>
+                                <li className="list-group-item"><strong>Payment Mode:</strong> {paymentmode}</li>
+
               </ul>
             </div>
 

@@ -9,10 +9,10 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     if (!vendorId) {
-      navigate("/vendor/login");
+      navigate(`/vendor/${id}`);
     }
     else if (id && vendorId !== id) {
-      navigate("/vendor/login");
+      navigate(`/vendor/${id}`);
     } else {
       setChecking(false); 
     }
