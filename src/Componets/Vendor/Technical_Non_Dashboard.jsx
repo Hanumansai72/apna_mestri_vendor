@@ -74,11 +74,8 @@ useEffect(()=>{
             setLocationName("Geolocation not supported");
         }
 
-        console.log("Vendor ID:", id);
     }, [id]);
-    const Pendings=12
-    const completeds=12
-
+    
     return (
         <div>
             <Navbar locationName={locationName} />
