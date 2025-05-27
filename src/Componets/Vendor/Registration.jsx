@@ -133,6 +133,7 @@ function Registration() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, otp })
       });
+      console.log(email,otp)
 
       if (!verifyRes.ok) {
         const errorData = await verifyRes.json();
