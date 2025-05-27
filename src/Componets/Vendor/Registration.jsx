@@ -76,7 +76,7 @@ function Registration() {
     }
 
     try {
-      const res = await fetch("http://localhost:8031/sendotp", {
+      const res = await fetch("https://backend-d6mx.vercel.app/sendotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -128,7 +128,7 @@ function Registration() {
     }
 
     try {
-      const verifyRes = await fetch("http://localhost:8031/verifyotp", {
+      const verifyRes = await fetch("https://backend-d6mx.vercel.app/verifyotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, otp })
