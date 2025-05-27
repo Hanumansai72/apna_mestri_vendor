@@ -76,15 +76,15 @@ export default function LoginPage() {
             Professional
           </button>
           <button
-            onClick={() => setActiveTab("customer")}
-            className={`btn ${activeTab === "customer" ? "btn-warning text-white" : "btn-light text-secondary"}`}
+            onClick={() => setActiveTab("product")}
+            className={`btn ${activeTab === "product" ? "btn-warning text-white" : "btn-light text-secondary"}`}
           >
             Product
           </button>
         </div>
 
         <div className="w-100 px-3" style={{ maxWidth: "500px" }}>
-          <h2 className="mb-4">{activeTab === "vendor" ? "Vendor Login" : "Customer Login"}</h2>
+          <h2 className="mb-4">{activeTab === "vendor" ? "Vendor Login" : "Product Login"}</h2>
           <form className="mb-3 w-100" onSubmit={handleLogin}>
             <div className="mb-3 w-100">
               <label className="form-label">Email Address</label>
@@ -122,9 +122,7 @@ export default function LoginPage() {
 
           <div className="text-center mb-3">or</div>
 
-          <button className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center">
-            Continue with Google
-          </button>
+          
 
           <p className="text-center mt-3 small">
             Don't have an account? <a href="/signup" className="text-warning">Create Account</a>

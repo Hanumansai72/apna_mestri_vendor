@@ -9,21 +9,13 @@ function Registration() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [idType, setIdType] = useState("PAN");
   const [imageFile, setImageFile] = useState(null);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState('');
 
   const [formData, setFormData] = useState({
-    Business_Name: "",
-    Owner_name: "",
-    Email_address: "",
-    Phone_number: "",
-    Business_address: "",
-    Category: "",
-    Sub_Category: [],
-    Tax_ID: "",
-    Password: "",
-    Latitude: "",
-    Longitude: "",
-    ProductUrl: "",
-    ID_Type: "PAN"
+    Business_Name: "", Owner_name: "", Email_address: "", Phone_number: "",
+    Business_address: "", Category: "", Sub_Category: [], Tax_ID: "",
+    Password: "", Latitude: "", Longitude: "", ProductUrl: "", ID_Type: "PAN"
   });
 
   const subCategories = {
@@ -49,59 +41,121 @@ function Registration() {
   };
 
   const handleLocateMe = () => {
-  if (!navigator.geolocation) return toast.error("Geolocation not supported");
+    if (!navigator.geolocation) return toast.error("Geolocation not supported");
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      const { latitude, longitude } = coords;
+      try {
+        const apiKey = 'pk.b6ebdeccc1f35c3e45b72aba8fec713c';
+        const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${latitude}&lon=${longitude}&format=json`);
+        const data = await res.json();
+        const address = data.display_name || "";
+        const state = data.address?.state || "";
+        const city = data.address?.city || data.address?.town || data.address?.village || "";
+        const postcode = data.address?.postcode || "";
 
-  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-    const { latitude, longitude } = coords;
+        setFormData(prev => ({
+          ...prev,
+          Business_address: `${address}, ${city}, ${state} - ${postcode}`,
+          Latitude: latitude.toString(),
+          Longitude: longitude.toString()
+        }));
+      } catch (error) {
+        toast.error("Location fetch failed");
+        console.error(error);
+      }
+    }, () => toast.error("Location access denied"));
+  };
+
+  const handleSendOtp = async () => {
+    const email = document.querySelector('input[name="Email_address"]').value;
+
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      return toast.error("Please enter a valid email");
+    }
 
     try {
-      const apiKey = 'pk.b6ebdeccc1f35c3e45b72aba8fec713c'; // Replace with your actual API key
-      const res = await fetch(`https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${latitude}&lon=${longitude}&format=json`);
-      const data = await res.json();
+      const res = await fetch("https://backend-d6mx.vercel.app/sendotp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
 
-      const address = data.display_name || "";
-      const state = data.address?.state || "";
-      const city = data.address?.city || data.address?.town || data.address?.village || "";
-      const postcode = data.address?.postcode || "";
-
-      setFormData(prev => ({
-        ...prev,
-        Business_address: `${address}, ${city}, ${state} - ${postcode}`,
-        Latitude: latitude.toString(),
-        Longitude: longitude.toString()
-      }));
+      if (res.ok) {
+        toast.success("OTP sent to your email!");
+        setShowOtp(true);
+      } else {
+        const err = await res.json();
+        toast.error(err.message || "Failed to send OTP");
+      }
     } catch (error) {
-      toast.error("Location fetch failed");
+      toast.error("Failed to send OTP");
       console.error(error);
     }
-  }, () => toast.error("Location access denied"));
-};
+  };
+
+  const handleOtpChange = (e) => {
+    setOtp(e.target.value);
+  };
 
   const uploadImageToCloudinary = async () => {
     const data = new FormData();
     data.append("file", imageFile);
-    data.append("upload_preset", "myupload"); // Replace
-    data.append("cloud_name", "dqxsgmf33");       // Replace
+    data.append("upload_preset", "myupload");
+    data.append("cloud_name", "dqxsgmf33");
 
     const res = await fetch("https://api.cloudinary.com/v1_1/dqxsgmf33/image/upload", {
       method: "POST",
       body: data
     });
+
     const cloudData = await res.json();
     return cloudData.secure_url;
   };
 
   const handleSubmit = async (e) => {
+    const email = document.querySelector('input[name="Email_address"]').value;
+
     e.preventDefault();
-    if (formData.Password !== confirmPassword) return toast.error("Passwords do not match");
+
+    if (formData.Password !== confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    if (!otp || otp.length !== 6) {
+      return toast.error("Please enter the 6-digit OTP sent to your email");
+    }
 
     try {
-      let imageUrl = "";
-      if (imageFile) {
-        toast.info("Uploading image...");
-        imageUrl = await uploadImageToCloudinary();
-      }
+      const verifyRes = await fetch("https://backend-d6mx.vercel.app/verifyotp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, otp })
+      });
 
+      if (!verifyRes.ok) {
+        const errorData = await verifyRes.json();
+        return toast.error(errorData.error || "OTP verification failed");
+      }
+    } catch (err) {
+      toast.error("OTP verification request failed");
+      console.error(err);
+      return;
+    }
+
+    // Step 2: Upload image if selected
+    let imageUrl = "";
+    if (imageFile) {
+      toast.info("Uploading image...");
+      try {
+        imageUrl = await uploadImageToCloudinary();
+      } catch (error) {
+        toast.error("Image upload failed");
+        return;
+      }
+    }
+
+    try {
       const res = await fetch('https://backend-d6mx.vercel.app/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,10 +164,18 @@ function Registration() {
 
       if (res.ok) {
         toast.success("Vendor registered successfully!");
-        setFormData({ Business_Name: "", Owner_name: "", Email_address: "", Phone_number: "", Business_address: "", Category: "", Sub_Category: [], Tax_ID: "", Password: "", Latitude: "", Longitude: "", ProductUrl: "", ID_Type: "PAN" });
+        setFormData({
+          Business_Name: "", Owner_name: "", Email_address: "", Phone_number: "",
+          Business_address: "", Category: "", Sub_Category: [], Tax_ID: "",
+          Password: "", Latitude: "", Longitude: "", ProductUrl: "", ID_Type: "PAN"
+        });
         setConfirmPassword("");
         setSelectedCategory("");
         setImageFile(null);
+        setShowOtp(false);
+        setOtp("");
+      } else if (res.status === 400) {
+        toast.error("Email already exists");
       } else {
         toast.error("Registration failed");
       }
@@ -128,28 +190,41 @@ function Registration() {
       <ToastContainer />
       <button className="btn btn-secondary mb-3" onClick={() => navigate('/login')}>← Back to Login</button>
       <form className="card p-4 shadow" onSubmit={handleSubmit}>
-        <div className="text-center mb-4">
-          <h2>Register as a Vendor</h2>
-        </div>
+        <h2 className="text-center mb-4">Register as a Vendor</h2>
 
         <div className="row g-3">
-          {/* Basic Info Fields */}
           <div className="col-md-6"><label>Business Name</label><input type="text" className="form-control" name="Business_Name" value={formData.Business_Name} onChange={handleChange} required /></div>
           <div className="col-md-6"><label>Owner Name</label><input type="text" className="form-control" name="Owner_name" value={formData.Owner_name} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label>Email</label><input type="email" className="form-control" name="Email_address" value={formData.Email_address} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label>Phone</label><input type="text" className="form-control" name="Phone_number" value={formData.Phone_number} onChange={handleChange} required /></div>
+
+          <div className="col-md-6">
+            <label>Email</label>
+            <div className="input-group">
+              <input type="email" className="form-control" name="Email_address" value={formData.Email_address} onChange={handleChange} required />
+              <button type="button" className="btn btn-outline-success" onClick={handleSendOtp}>Send OTP</button>
+            </div>
+          </div>
+
+          {showOtp && (
+            <div className="col-md-6">
+              <label>Enter OTP</label>
+              <input type="text" className="form-control" value={otp} onChange={handleOtpChange} maxLength={6} placeholder="Enter 6-digit OTP" required />
+            </div>
+          )}
+
+          <div className="col-md-6"><label>Phone Number</label><input type="text" className="form-control" name="Phone_number" value={formData.Phone_number} onChange={handleChange} required /></div>
+
           <div className="col-md-12">
             <label>Business Address</label>
             <div className="input-group">
-              <input type="text" className="form-control" name="Business_address" value={formData.Business_address} onChange={handleChange} />
+              <input type="text" className="form-control" name="Business_address" value={formData.Business_address} onChange={handleChange} readOnly />
               <button type="button" className="btn btn-outline-primary" onClick={handleLocateMe}>Locate Me</button>
             </div>
           </div>
+
           <div className="col-md-6"><label>Tax ID</label><input type="text" className="form-control" name="Tax_ID" value={formData.Tax_ID} onChange={handleChange} /></div>
           <div className="col-md-6"><label>Password</label><input type="password" className="form-control" name="Password" value={formData.Password} onChange={handleChange} required /></div>
           <div className="col-md-6"><label>Confirm Password</label><input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required /></div>
 
-          {/* ID Type Dropdown */}
           <div className="col-md-6">
             <label>Select ID Type</label>
             <select className="form-select" value={idType} onChange={(e) => setIdType(e.target.value)}>
@@ -158,14 +233,12 @@ function Registration() {
             </select>
           </div>
 
-          {/* Image Upload */}
           <div className="col-md-12">
             <label>Upload ID Image</label>
             <input type="file" className="form-control" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} />
           </div>
         </div>
 
-        {/* Category Buttons */}
         <h4 className="mt-4">Business Category</h4>
         <div className="row text-center">
           {["Technical", "Non-Technical", "Products"].map((cat, idx) => (
@@ -175,7 +248,6 @@ function Registration() {
           ))}
         </div>
 
-        {/* Sub-category */}
         {selectedCategory && selectedCategory !== "Products" && (
           <div className="mt-4">
             <label>Specializations</label>
