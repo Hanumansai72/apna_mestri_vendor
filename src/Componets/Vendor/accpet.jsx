@@ -75,9 +75,7 @@ const JobListings = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleApplyFilters = () => {
-    setCurrentPage(1);
-  };
+  
 
   return (
     <div>
@@ -113,7 +111,6 @@ const JobListings = () => {
             <option value="Chicago">Chicago</option>
             <option value="New York">New York</option>
           </Form.Select>
-          <Button variant="primary" onClick={handleApplyFilters}>Apply Filters</Button>
         </div>
 
         {currentJobs.length > 0 ? currentJobs.map(job => (
@@ -142,7 +139,6 @@ const JobListings = () => {
                 <Col md={4} className="text-md-end mt-3 mt-md-0">
                   <Badge bg={statusVariant[job.status]} className="mb-3">{job.status}</Badge>
                   <div className="d-flex flex-wrap gap-2 justify-content-md-end">
-                    {/* Show buttons only for Pending and Accepted statuses */}
                     {['Pending', 'Accepted'].includes(job.status) && (
   <Button
     variant={actionButton[job.status].variant}
@@ -159,7 +155,6 @@ const JobListings = () => {
 
 
                     <Button variant="outline-secondary">Call</Button>
-                    <Button variant="outline-secondary">View Details</Button>
                     <Button variant="outline-secondary">Email</Button>
                   </div>
                 </Col>
