@@ -5,13 +5,11 @@ import axios from 'axios';
 
 function TechnicalNonDashboard() {
     const { id } = useParams(); 
-    const [count,setcount]=useState()
-    
-    
-
+    const [count, setCount] = useState();
+    const [upcomingJobs, setUpcomingJobs] = useState([]);
     const [locationName, setLocationName] = useState("Fetching location...");
     const [distance, setDistance] = useState(null);
-    
+
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -22,18 +20,17 @@ function TechnicalNonDashboard() {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
-useEffect(()=>{
-    axios.get(`https://backend-d6mx.vercel.app/count/service/${id}`
 
-    )
-    .then(res=>{
-        setcount(res.data)
-        console.log(res.data)
-    })
-    .catch(err=>{
-        console.log(err)
-    })
-},[id])
+    useEffect(() => {
+        axios.get(`https://backend-d6mx.vercel.app/count/service/${id}`)
+            .then(res => setCount(res.data))
+            .catch(err => console.error(err));
+
+        axios.get(`https://backend-d6mx.vercel.app/upcomingjobs/${id}`)
+            .then(res => setUpcomingJobs(res.data))
+            .catch(err => console.error(err));
+    }, [id]);
+
     async function getCoordinatesFromCity(cityName) {
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?city=${cityName}&state=Telangana&country=India&format=json&addressdetails=1`);
@@ -54,7 +51,6 @@ useEffect(()=>{
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
-
                 try {
                     const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
                     const name = res.data.address.city || res.data.address.town || res.data.address.village || "Your Area";
@@ -73,9 +69,8 @@ useEffect(()=>{
         } else {
             setLocationName("Geolocation not supported");
         }
-
     }, [id]);
-    
+
     return (
         <div>
             <Navbar locationName={locationName} />
@@ -83,10 +78,10 @@ useEffect(()=>{
 
             <div className="container mt-4">
                 <div className="row g-3">
-                    {[
+                    {[ 
                         { title: "New Jobs", count: count?.count1, icon: "bi-briefcase-fill" },
                         { title: "Pending Jobs", count: count?.count1, icon: "bi-clock-fill" },
-                        { title: "Completed Jobs", count:count?.count2, icon: "bi-check-circle-fill" },
+                        { title: "Completed Jobs", count: count?.count2, icon: "bi-check-circle-fill" },
                     ].map((item, i) => (
                         <div className="col-md-3" key={i}>
                             <div className="card text-center shadow-sm">
@@ -101,19 +96,22 @@ useEffect(()=>{
                 </div>
 
                 <h2 className="mt-5 mb-3">Upcoming Jobs</h2>
-                {[...Array(3)].map((_, index) => (
-                    <div className="card mb-3 shadow-sm" key={index}>
+
+                {upcomingJobs.map((job, index) => (
+                    <div className="card mb-3 shadow-sm" key={job._id}>
                         <div className="card-body">
                             <div className="d-flex justify-content-between mb-2">
-                                <span className="badge text-bg-secondary">Electrical</span>
-                                <span className="badge text-bg-warning text-dark">Today 10:00 AM</span>
+                                <span className="badge text-bg-secondary">{job.Vendorid?.Category}</span>
+                                <span className="badge text-bg-warning text-dark">
+                                    {new Date(job.serviceDate).toDateString()} {job.serviceTime}
+                                </span>
                             </div>
-                            <h5>Electrical Panel Upgrade</h5>
+                            <h5>Job at {job.address?.street}</h5>
                             <p className="text-muted mb-1">
                                 {locationName} – Distance: {distance ? `${distance.toFixed(2)} km` : "Calculating..."}
                             </p>
-                            <p className="mb-1">Customer Name: Rajesh</p>
-                            <p className="fw-bold">Estimated Reward: ₹150–300</p>
+                            <p className="mb-1">Customer Name: {job.customer?.fullName}</p>
+                            <p className="fw-bold">Estimated Reward: ₹{job.totalAmount}</p>
                             <div className="d-flex gap-2">
                                 <button className="btn btn-secondary">View Job</button>
                                 <button className="btn btn-primary">Start Job</button>
@@ -125,7 +123,7 @@ useEffect(()=>{
                 <div className="mt-5">
                     <h4>Performance Tracker</h4>
                     <div className="row g-3">
-                        {[
+                        {[ 
                             { label: "Total Rewards Earned", value: "₹3,000" },
                             { label: "Bonus Earned", value: "₹300" },
                             { label: "Rating", value: <><i className="bi bi-star-fill text-warning"></i> 3.0/5.0</> }
