@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
-  const { id } = useParams(); // get the :id from the URL
+  const { id } = useParams(); 
   const [checking, setChecking] = useState(true);
   const vendorId = localStorage.getItem("vendorId");
 

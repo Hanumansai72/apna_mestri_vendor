@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './navbar';
 import './vendor_settings.css';
 import axios from 'axios';
 
@@ -18,7 +17,7 @@ function VendorProfileSettings() {
   
   const handleSaveChanges = async () => {
   try {
-    const res = await axios.put(`http://localhost:8031/update/userdetailes/${id}`, formdata);
+    const res = await axios.put(`https://backend-d6mx.vercel.app/update/userdetailes/${id}`, formdata);
     alert("Changes saved successfully");
     console.log(res)
   } catch (err) {
@@ -61,17 +60,7 @@ function VendorProfileSettings() {
   };
   return (
     <div>
-      <Navbar
-        homeLabel="Home"
-        homeUrl="/Product"
-        jobsLabel="Products"
-        jobsUrl="/Product/order"
-        historyLabel="Orders History"
-        historyUrl="/Product/order/history"
-        earningsLabel="Earnings"
-        earningsUrl="/vendor/earnings"
-      />
-
+      
       <div className="container settings_vendor mt-4">
         <h3 className="Settings_Heading mb-4">Account Settings</h3>
 

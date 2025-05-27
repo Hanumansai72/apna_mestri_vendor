@@ -27,7 +27,7 @@ function Navbar({
   const defaultVendorId = localStorage.getItem("vendorId");
 
   const resolvedHomeUrl = homeUrl || `/vendor/${defaultVendorId}`;
-  const resolvedJobsUrl = jobsUrl || `/vendor/${defaultVendorId}/Jobs`;
+  const resolvedJobsUrl = jobsUrl || `/vendor/${defaultVendorId}`;
   const resolvedHistoryUrl = historyUrl || `/vendor/${defaultVendorId}/Job/history`;
   const resolvedEarningsUrl = earningsUrl || `/vendor/${defaultVendorId}/earnings`;
   const profileUrl = `/${defaultVendorId}/settings`;

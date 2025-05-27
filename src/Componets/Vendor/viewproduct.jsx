@@ -16,9 +16,42 @@ import { Link } from "react-router-dom";
 
 const id = localStorage.getItem("vendorId");
 
+// Static category and subcategory mapping
+const categoryMap = {
+  Cement: ["UltraTech", "ACC", "Ambuja", "Dalmia", "Ramco"],
+  Steel: ["TATA Tiscon", "JSW Steel", "Jindal Panther", "SAIL"],
+  Plumbing: ["Ashirvad", "Astral", "Prince", "Supreme"],
+  Electrical: ["Havells", "Finolex", "Polycab", "RR Kabel"],
+  Paints: ["Asian Paints", "Berger", "Nerolac", "Indigo"],
+  Bricks: ["Wienerberger", "Porotherm", "Jindal Bricks"],
+  Sand: ["Robo Sand", "River Sand", "M-Sand"],
+  Aggregates: ["20mm Aggregate", "40mm Aggregate", "10mm Aggregate"],
+  Concrete: ["RMC India", "Ultratech RMC", "ACC Ready Mix"],
+  Tiles: ["Kajaria", "Somany", "Nitco", "Johnson"],
+  Glass: ["Saint-Gobain", "AIS Glass", "Modiguard"],
+  Doors: ["Greenply", "CenturyPly", "Kitply", "Fenesta"],
+  Windows: ["Fenesta", "UPVC India", "Windoor"],
+  Roofing: ["Tata Shaktee", "Everest", "JSW Colouron+"],
+  GroutsSealants: ["Dr. Fixit", "MYK LATICRETE", "Roff"],
+  Lighting: ["Philips", "Syska", "Wipro", "Halonix"],
+  Kitchen: ["Hettich", "Häfele", "Godrej Interio"],
+  Wardrobe: ["Godrej", "Durian", "Urban Ladder"],
+  Wallpaper: ["Nilaya", "Excel", "Marburg"],
+  Curtains: ["D'Decor", "Fabindia", "Spaces"],
+  Furniture: ["IKEA", "Urban Ladder", "Pepperfry"],
+  BathroomFittings: ["Jaquar", "Kohler", "Hindware"],
+  FalseCeiling: ["Gyproc", "Armstrong", "USG Boral"],
+  Flooring: ["Pergo", "Greenlam", "Squarefoot"],
+  ModularFurniture: ["Godrej Interio", "Featherlite", "Zuari"],
+  DecorativePanels: ["Merino", "Greenlam", "Century Laminates"],
+  SmartHome: ["Schneider", "Anchor", "Legrand"],
+};
+
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [priceSort, setPriceSort] = useState("default");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
@@ -34,7 +67,7 @@ const ProductList = () => {
           category: product.ProductCategory,
           subcategory: product.ProductSubCategory,
           description: product.ProductDescripition,
-          ProductUrl:product.ProductUrl,
+          ProductUrl: product.ProductUrl,
           availability: true,
           status:
             parseInt(product.ProductStock) === 0
@@ -43,7 +76,6 @@ const ProductList = () => {
               ? "Low Stock"
               : "Available",
         }));
-
         setProducts(mappedProducts);
       })
       .catch((err) => console.error("Error fetching products:", err));
@@ -53,24 +85,19 @@ const ProductList = () => {
     setEditProduct(product);
     setShowModal(true);
   };
+
   const handleDelete = (productId) => {
-  if (window.confirm("Are you sure you want to delete this product?")) {
-    axios
-      .delete(`https://backend-d6mx.vercel.app/delete/${productId}`)
-      .then(() => {
-        setProducts((prev) => prev.filter((p) => p.id !== productId));
-      })
-      .catch((err) => {
-        console.error("Error deleting product:", err);
-        alert("Failed to delete product.");
-      });
-  }
-};
-
-
-  const handleModalClose = () => {
-    setShowModal(false);
-    setEditProduct(null);
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      axios
+        .delete(`https://backend-d6mx.vercel.app/delete/${productId}`)
+        .then(() => {
+          setProducts((prev) => prev.filter((p) => p.id !== productId));
+        })
+        .catch((err) => {
+          console.error("Error deleting product:", err);
+          alert("Failed to delete product.");
+        });
+    }
   };
 
   const handleInputChange = (e) => {
@@ -79,33 +106,44 @@ const ProductList = () => {
   };
 
   const handleSaveChanges = () => {
-  axios
-    .put(` https://backend-d6mx.vercel.app/updatedetails/${editProduct.id}`, {
-      ProductName: editProduct.name,
-      ProductPrice: editProduct.price,
-      ProductStock: editProduct.stock,
-      ProductDescription: editProduct.description,
-      ProductCategory: editProduct.category,
-      ProductSubCategory: editProduct.subcategory,
-      ProductTags: "", 
-      ProductLocation: "",
+    axios
+      .put(
+        `https://backend-d6mx.vercel.app/updatedetails/${editProduct.id}`,
+        {
+          ProductName: editProduct.name,
+          ProductPrice: editProduct.price,
+          ProductStock: editProduct.stock,
+          ProductDescription: editProduct.description,
+          ProductCategory: editProduct.category,
+          ProductSubCategory: editProduct.subcategory,
+          ProductTags: "",
+          ProductLocation: "",
+        }
+      )
+      .then(() => {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === editProduct.id ? { ...editProduct } : p))
+        );
+        setShowModal(false);
+        setEditProduct(null);
+      })
+      .catch((err) => {
+        console.error("Error updating product:", err);
+        alert("Failed to update product.");
+      });
+  };
+
+  const filteredProducts = products
+    .filter((product) => {
+      const nameMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const categoryMatch = selectedCategory === "All" || product.category === selectedCategory;
+      return nameMatch && categoryMatch;
     })
-    .then((res) => {
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editProduct.id ? { ...editProduct } : p))
-      );
-      handleModalClose();
-    })
-    .catch((err) => {
-      console.error("Error updating product:", err);
-      alert("Failed to update product.");
+    .sort((a, b) => {
+      if (priceSort === "lowToHigh") return a.price - b.price;
+      if (priceSort === "highToLow") return b.price - a.price;
+      return 0;
     });
-};
-
-
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div>
@@ -142,25 +180,27 @@ const ProductList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Col>
-          <Col md={3}>
-            <Form.Select>
-              <option>Category: All</option>
-              <option>Electronics</option>
-              <option>Clothing</option>
+          <Col md={4}>
+            <Form.Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="All">Category: All</option>
+              {Object.keys(categoryMap).map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
             </Form.Select>
           </Col>
-          <Col md={3}>
-            <Form.Select>
-              <option>Availability: All</option>
-              <option>Available</option>
-              <option>Unavailable</option>
-            </Form.Select>
-          </Col>
-          <Col md={2}>
-            <Form.Select>
-              <option>Sort by: Newest</option>
-              <option>Price</option>
-              <option>Name</option>
+          <Col md={4}>
+            <Form.Select
+              value={priceSort}
+              onChange={(e) => setPriceSort(e.target.value)}
+            >
+              <option value="default">Sort by: Default</option>
+              <option value="lowToHigh">Price: Low to High</option>
+              <option value="highToLow">Price: High to Low</option>
             </Form.Select>
           </Col>
         </Row>
@@ -176,7 +216,7 @@ const ProductList = () => {
                 />
                 <Card.Body>
                   <Card.Title>{product.name}</Card.Title>
-                  <h6>{product.price}</h6>
+                  <h6>₹ {product.price}</h6>
                   <p className="text-muted">
                     {product.category} · {product.subcategory}
                   </p>
@@ -194,7 +234,6 @@ const ProductList = () => {
                   >
                     {product.status}
                   </Badge>
-                  
                 </Card.Body>
                 <Card.Footer className="d-flex justify-content-between align-items-center">
                   <Button
@@ -202,98 +241,46 @@ const ProductList = () => {
                     size="sm"
                     onClick={() => handleEditClick(product)}
                   >
-                    <FaEdit />
-                     Edit
+                    <FaEdit /> Edit
                   </Button>
-                  <Button variant="danger"  onClick={() => handleDelete(product.id)}>
-              Delete
-            </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Delete
+                  </Button>
                 </Card.Footer>
               </Card>
             </Col>
           ))}
         </Row>
 
-        <div className="d-flex justify-content-end mt-4">
-          <nav>
-            <ul className="pagination">
-              <li className="page-item active">
-                <button className="page-link">1</button>
-              </li>
-              <li className="page-item">
-                <button className="page-link">2</button>
-              </li>
-              <li className="page-item">
-                <button className="page-link">3</button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-
-        {/* Modal for Editing Product */}
-        <Modal show={showModal} onHide={handleModalClose}>
+        {/* Edit Modal */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Edit Product</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {editProduct && (
               <Form>
-                <Form.Group className="mb-2">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    name="name"
-                    value={editProduct.name}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Price</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="price"
-                    value={editProduct.price}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Stock</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="stock"
-                    value={editProduct.stock}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="description"
-                    value={editProduct.description}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Category</Form.Label>
-                  <Form.Control
-                    name="category"
-                    value={editProduct.category}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Subcategory</Form.Label>
-                  <Form.Control
-                    name="subcategory"
-                    value={editProduct.subcategory}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
+                {["name", "price", "stock", "description", "category", "subcategory"].map(
+                  (field) => (
+                    <Form.Group key={field} className="mb-2">
+                      <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
+                      <Form.Control
+                        name={field}
+                        value={editProduct[field]}
+                        onChange={handleInputChange}
+                        type={["price", "stock"].includes(field) ? "number" : "text"}
+                      />
+                    </Form.Group>
+                  )
+                )}
               </Form>
             )}
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleModalClose}>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
             <Button variant="primary" onClick={handleSaveChanges}>
