@@ -68,6 +68,7 @@ function Registration() {
 
   const handleSendOtp = async () => {
     const email = document.querySelector('input[name="Email_address"]').value;
+    console.log(email)
 
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
@@ -75,7 +76,7 @@ function Registration() {
     }
 
     try {
-      const res = await fetch("https://backend-d6mx.vercel.app/sendotp", {
+      const res = await fetch("http://localhost:8031/sendotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -127,7 +128,7 @@ function Registration() {
     }
 
     try {
-      const verifyRes = await fetch("https://backend-d6mx.vercel.app/verifyotp", {
+      const verifyRes = await fetch("http://localhost:8031/verifyotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, otp })
