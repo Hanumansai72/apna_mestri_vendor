@@ -9,16 +9,73 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [tech, setTech] = useState("");
   const [vendorId, setVendorId] = useState("");
 
+  const sendOtp = async () => {
+    try {
+      const res = await axios.post("https://backend-d6mx.vercel.app/sendotp", { Email: username });
+      console.log("OTP Sent", res.data);
+      toast.success("OTP sent to your email");
+      setOtpSent(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send OTP");
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post("https://backend-d6mx.vercel.app/verifyotp", {
+        Email: username,
+        otp: otp,
+      });
+      if (res.data.message === "OTP verified") {
+        toast.success("OTP verified successfully");
+        setOtpVerified(true);
+      } else {
+        toast.error("Invalid OTP");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("OTP verification failed");
+    }
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    if (!otpVerified) {
+      toast.error("Please verify OTP before login");
+      return;
+    }
+
+    try {
+      const values = { username, password };
+      const res = await axios.post("https://backend-d6mx.vercel.app/postusername", values);
+
+      if (res.data.message === "Success") {
+        toast.success("Login successful");
+        const id = res.data.vendorId;
+        localStorage.setItem("vendorId", id);
+        setVendorId(id);
+      } else {
+        toast.error("Login failed. Please check credentials.");
+        navigate("/vendor/register");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Server error during login.");
+    }
+  };
+
   useEffect(() => {
     if (!vendorId) return;
-
     axios
       .get(`https://backend-d6mx.vercel.app/api/categories/${vendorId}`)
       .then((res) => {
-        console.log("Category Data:", res.data);
         setTech(res.data.Category);
       })
       .catch((err) => {
@@ -28,41 +85,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!vendorId || !tech) return;
-
     const techLower = tech.toLowerCase();
-
     if (techLower === "technical" || techLower === "non-technical") {
       navigate(`/vendor/${vendorId}`);
     } else {
       navigate(`/product/${vendorId}`);
     }
   }, [vendorId, tech, navigate]);
-
-  const handleLogin = (event) => {
-    event.preventDefault();
-
-    const values = { username, password };
-
-    axios
-      .post("https://backend-d6mx.vercel.app/postusername", values)
-      .then((res) => {
-        console.log("Login response:", res.data);
-
-        if (res.data.message === "Success") {
-          toast.success("Login successful");
-          const id = res.data.vendorId;
-          localStorage.setItem("vendorId", id);
-          setVendorId(id);
-        } else {
-          toast.error("Login failed. Please check credentials.");
-          navigate("/vendor/register");
-        }
-      })
-      .catch((err) => {
-        console.error("Login error:", err);
-        toast.error("Server error during login.");
-      });
-  };
 
   return (
     <div className="d-flex vh-100 flex-column flex-md-row">
@@ -86,17 +115,55 @@ export default function LoginPage() {
         <div className="w-100 px-3" style={{ maxWidth: "500px" }}>
           <h2 className="mb-4">{activeTab === "vendor" ? "Vendor Login" : "Product Login"}</h2>
           <form className="mb-3 w-100" onSubmit={handleLogin}>
+            {/* Email and OTP */}
             <div className="mb-3 w-100">
               <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                value={username}
-                className="form-control"
-                placeholder="you@example.com"
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+              <div className="d-flex">
+                <input
+                  type="email"
+                  value={username}
+                  className="form-control me-2"
+                  placeholder="you@example.com"
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setOtp("");
+                    setOtpSent(false);
+                    setOtpVerified(false);
+                  }}
+                  required
+                />
+                {!otpSent ? (
+                  <button type="button" className="btn btn-primary btn-sm" onClick={sendOtp}>
+                    Send OTP
+                  </button>
+                ) : (
+                  !otpVerified && (
+                    <button type="button" className="btn btn-success btn-sm" onClick={verifyOtp}>
+                      Verify OTP
+                    </button>
+                  )
+                )}
+              </div>
             </div>
+
+            {/* OTP Field */}
+            {otpSent && !otpVerified && (
+              <div className="mb-3">
+                <label>Enter OTP</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter OTP sent to your email"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* OTP Verified Text */}
+            {otpVerified && <div className="mb-2 text-success fw-bold">✅ OTP Verified</div>}
+
+            {/* Password */}
             <div className="mb-3 w-100">
               <label className="form-label">Password</label>
               <input
@@ -108,6 +175,7 @@ export default function LoginPage() {
                 required
               />
             </div>
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="form-check">
                 <input type="checkbox" className="form-check-input" id="rememberMe" />
@@ -115,18 +183,23 @@ export default function LoginPage() {
               </div>
               <a href="/" className="text-warning small">Forgot Password?</a>
             </div>
-            <button type="submit" className="btn btn-warning w-100 text-white">
+
+            <button type="submit" className="btn btn-warning w-100 text-white" disabled={!otpVerified}>
               Log In
             </button>
           </form>
 
           <div className="text-center mb-3">or</div>
-
-          
-
           <p className="text-center mt-3 small">
-            Don't have an account? <a href="/signup" className="text-warning">Create Account</a>
-          </p>
+  Don't have an account?{" "}
+  <a
+    href={activeTab === "product" ? "/signup?tab=product" : "/signup"}
+    className="text-warning"
+  >
+    Create Account
+  </a>
+</p>
+
         </div>
       </div>
 
