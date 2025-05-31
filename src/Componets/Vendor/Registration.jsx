@@ -83,7 +83,7 @@ function Registration() {
       const res = await fetch("https://backend-d6mx.vercel.app/sendotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ Email:email })
       });
 
       if (res.ok) {
