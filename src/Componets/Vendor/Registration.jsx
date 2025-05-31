@@ -6,8 +6,9 @@ import axios from 'axios';
 
 function Registration() {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState('');
-  const [selectedServiceType, setSelectedServiceType] = useState('');
+  const [selectedTab, setSelectedTab] = useState('Service'); // Default to Service tab
+const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // Optional: Default to Technical service
+
   const [confirmPassword, setConfirmPassword] = useState('');
   const [idType, setIdType] = useState('PAN');
   const [imageFile, setImageFile] = useState(null);
@@ -45,7 +46,7 @@ function Registration() {
 
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
-    setSelectedServiceType('');
+    setSelectedServiceType('Service');
     setFormData((prev) => ({ ...prev, Category: tab, Sub_Category: [] }));
   };
 
