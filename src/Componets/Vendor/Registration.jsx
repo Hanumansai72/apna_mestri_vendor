@@ -130,7 +130,7 @@ function Registration() {
       const verifyRes = await fetch("https://backend-d6mx.vercel.app/verifyotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.Email_address, otp })
+        body: JSON.stringify({ Email: formData.Email_address, otp })
       });
 
       if (!verifyRes.ok) {
