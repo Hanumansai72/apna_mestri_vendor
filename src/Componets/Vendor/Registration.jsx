@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
 function Registration() {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState('Service'); // Default to Service tab
-const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // Optional: Default to Technical service
+  const location = useLocation();
+  
+  const getRegistrationType = () => {
+    const urlParams = new URLSearchParams(location.search);
+    return urlParams.get('tab') === 'product' ? 'Product' : 'Service';
+  };
+  
+  const [registrationType] = useState(getRegistrationType());
+  const [selectedServiceType, setSelectedServiceType] = useState('Technical');
 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [idType, setIdType] = useState('PAN');
@@ -44,11 +51,14 @@ const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // 
     ]
   };
 
-  const handleTabClick = (tab) => {
-    setSelectedTab(tab);
-    setSelectedServiceType('Service');
-    setFormData((prev) => ({ ...prev, Category: tab, Sub_Category: [] }));
-  };
+  // Set initial category based on registration type
+  useEffect(() => {
+    if (registrationType === 'Product') {
+      setFormData(prev => ({ ...prev, Category: 'Product', Sub_Category: [] }));
+    } else {
+      setFormData(prev => ({ ...prev, Category: selectedServiceType, Sub_Category: [] }));
+    }
+  }, [registrationType, selectedServiceType]);
 
   const handleServiceTypeClick = (type) => {
     setSelectedServiceType(type);
@@ -183,18 +193,10 @@ const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // 
       <ToastContainer />
       <button className="btn btn-secondary mb-3" onClick={() => navigate('/login')}>← Back to Login</button>
 
-      <div className="row text-center mb-3">
-        {['Service', 'Product'].map((tab, idx) => (
-          <div className="col-md-6" key={idx}>
-            <button className={`btn w-100 ${selectedTab === tab ? 'btn-dark' : 'btn-outline-secondary'}`} onClick={() => handleTabClick(tab)}>
-              {tab}
-            </button>
-          </div>
-        ))}
-      </div>
-
       <form className="card p-4 shadow" onSubmit={handleSubmit}>
-        <h2 className="text-center mb-4">Register as a Vendor</h2>
+        <h2 className="text-center mb-4">
+          Register as a {registrationType === 'Product' ? 'Product Vendor' : 'Service Provider'}
+        </h2>
 
         <div className="row g-3">
           <div className="col-md-6">
@@ -231,47 +233,54 @@ const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // 
             <button type="button" className="btn btn-outline-secondary w-100" onClick={handleLocateMe}>📍 Locate Me</button>
           </div>
 
-          {selectedTab === 'Service' && (
-            <div className="row text-center mb-3">
-              {['Technical', 'Non-Technical'].map((type, idx) => (
-                <div className="col-md-6" key={idx}>
-                  <button
-                    type="button"
-                    className={`btn w-100 ${selectedServiceType === type ? 'btn-dark' : 'btn-outline-secondary'}`}
-                    onClick={() => handleServiceTypeClick(type)}
-                  >
-                    {type}
-                  </button>
+          {registrationType === 'Service' && (
+            <>
+              <div className="col-md-12">
+                <div className="row text-center mb-3">
+                  <div className="col-md-12">
+                    <h5 className="mb-3">Service Type</h5>
+                  </div>
+                  {['Technical', 'Non-Technical'].map((type, idx) => (
+                    <div className="col-md-6" key={idx}>
+                      <button
+                        type="button"
+                        className={`btn w-100 ${selectedServiceType === type ? 'btn-dark' : 'btn-outline-secondary'}`}
+                        onClick={() => handleServiceTypeClick(type)}
+                      >
+                        {type}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+
+              <div className="col-md-12">
+                <label>Specializations</label>
+                <div className="row">
+                  {subCategories[selectedServiceType]?.map((item, idx) => (
+                    <div className="col-md-6" key={idx}>
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={formData.Sub_Category.includes(item)}
+                          onChange={() => {
+                            const updated = formData.Sub_Category.includes(item)
+                              ? formData.Sub_Category.filter(i => i !== item)
+                              : [...formData.Sub_Category, item];
+                            setFormData(prev => ({ ...prev, Sub_Category: updated }));
+                          }}
+                        />
+                        <label className="form-check-label">{item}</label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
-          {selectedTab === 'Service' && selectedServiceType && (
-            <div className="col-md-12">
-              <label>Specializations</label>
-              <div className="row">
-                {subCategories[selectedServiceType]?.map((item, idx) => (
-                  <div className="col-md-6" key={idx}>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        checked={formData.Sub_Category.includes(item)}
-                        onChange={() => {
-                          const updated = formData.Sub_Category.includes(item)
-                            ? formData.Sub_Category.filter(i => i !== item)
-                            : [...formData.Sub_Category, item];
-                          setFormData(prev => ({ ...prev, Sub_Category: updated }));
-                        }}
-                      />
-                      <label className="form-check-label">{item}</label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          
 
           <div className="col-md-6">
             <label>ID Type</label>
@@ -295,7 +304,7 @@ const [selectedServiceType, setSelectedServiceType] = useState('Technical'); // 
           </div>
 
           <div className="col-md-12">
-            <label>Upload Image</label>
+            <label>Upload Image {registrationType === 'Product' ? '(Product Image)' : '(Business Logo/Certificate)'}</label>
             <input className="form-control" type="file" onChange={(e) => setImageFile(e.target.files[0])} />
           </div>
 

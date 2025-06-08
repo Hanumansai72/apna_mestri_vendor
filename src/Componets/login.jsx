@@ -93,6 +93,15 @@ export default function LoginPage() {
     }
   }, [vendorId, tech, navigate]);
 
+  // Function to handle registration redirect based on active tab
+  const handleCreateAccount = () => {
+    if (activeTab === "product") {
+      navigate("/signup?tab=product");
+    } else {
+      navigate("/signup");
+    }
+  };
+
   return (
     <div className="d-flex vh-100 flex-column flex-md-row">
       <ToastContainer />
@@ -191,15 +200,15 @@ export default function LoginPage() {
 
           <div className="text-center mb-3">or</div>
           <p className="text-center mt-3 small">
-  Don't have an account?{" "}
-  <a
-    href={activeTab === "product" ? "/signup?tab=product" : "/signup"}
-    className="text-warning"
-  >
-    Create Account
-  </a>
-</p>
-
+            Don't have an account?{" "}
+            <button
+              onClick={handleCreateAccount}
+              className="text-warning bg-transparent border-0 p-0 text-decoration-underline"
+              style={{ cursor: 'pointer' }}
+            >
+              Create Account
+            </button>
+          </p>
         </div>
       </div>
 
@@ -212,7 +221,7 @@ export default function LoginPage() {
           />
           <h3 className="fw-bold mb-2">Grow Your Business</h3>
           <p className="text-muted">
-            Join thousands of vendors who’ve increased their sales and expanded their customer base.
+            Join thousands of vendors who've increased their sales and expanded their customer base.
           </p>
         </div>
       </div>
