@@ -195,7 +195,7 @@ function Registration() {
 
       <form className="card p-4 shadow" onSubmit={handleSubmit}>
         <h2 className="text-center mb-4">
-          Register as a {registrationType === 'Product' ? 'Product Vendor' : 'Service Provider'}
+          Register as a {registrationType === 'Product' ? 'Product ' : 'Service '}
         </h2>
 
         <div className="row g-3">

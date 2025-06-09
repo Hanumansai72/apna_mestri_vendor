@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AdminApprovalPending from "./AdminApprovalPending"; // Make sure this is imported
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("vendor");
@@ -14,15 +15,14 @@ export default function LoginPage() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [tech, setTech] = useState("");
   const [vendorId, setVendorId] = useState("");
+  const [isPendingApproval, setIsPendingApproval] = useState(false);
 
   const sendOtp = async () => {
     try {
       const res = await axios.post("https://backend-d6mx.vercel.app/sendotp", { Email: username });
-      console.log("OTP Sent", res.data);
       toast.success("OTP sent to your email");
       setOtpSent(true);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to send OTP");
     }
   };
@@ -40,7 +40,6 @@ export default function LoginPage() {
         toast.error("Invalid OTP");
       }
     } catch (err) {
-      console.error(err);
       toast.error("OTP verification failed");
     }
   };
@@ -61,12 +60,21 @@ export default function LoginPage() {
         const id = res.data.vendorId;
         localStorage.setItem("vendorId", id);
         setVendorId(id);
+      } else if (res.data.message === "User not found") {
+        const tempRes = await axios.post("https://backend-d6mx.vercel.app/checktempvendor", {
+          Email_address: username,
+        });
+
+        if (tempRes.data.found) {
+          setIsPendingApproval(true);
+        } else {
+          toast.error("Login failed. Please check credentials.");
+          navigate("/signup");
+        }
       } else {
-        toast.error("Login failed. Please check credentials.");
-        navigate("/vendor/register");
+        toast.error("Incorrect password.");
       }
     } catch (err) {
-      console.error("Login error:", err);
       toast.error("Server error during login.");
     }
   };
@@ -93,7 +101,6 @@ export default function LoginPage() {
     }
   }, [vendorId, tech, navigate]);
 
-  // Function to handle registration redirect based on active tab
   const handleCreateAccount = () => {
     if (activeTab === "product") {
       navigate("/signup?tab=product");
@@ -101,6 +108,10 @@ export default function LoginPage() {
       navigate("/signup");
     }
   };
+
+  if (isPendingApproval) {
+    return <AdminApprovalPending />;
+  }
 
   return (
     <div className="d-flex vh-100 flex-column flex-md-row">
