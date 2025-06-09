@@ -7,18 +7,19 @@ import axios from 'axios';
 function Registration() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const getRegistrationType = () => {
     const urlParams = new URLSearchParams(location.search);
     return urlParams.get('tab') === 'product' ? 'Product' : 'Service';
   };
-  
+
   const [registrationType] = useState(getRegistrationType());
   const [selectedServiceType, setSelectedServiceType] = useState('Technical');
+  const [selectedProductCategory, setSelectedProductCategory] = useState(''); // For Civil/Interior
 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [idType, setIdType] = useState('PAN');
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]); // now an array of files
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
@@ -35,39 +36,37 @@ function Registration() {
     Password: '',
     Latitude: '',
     Longitude: '',
-    ProductUrl: '',
+    ProductUrls: [],  // will hold array of image URLs now
     ID_Type: 'PAN'
   });
 
   const subCategories = {
-    Technical: [
-      'Architects', 'Civil Engineer', 'Site Supervisor', 'Survey Engineer',
-      'MEP Consultant', 'Structural Engineer', 'Project Manager', 'HVAC Engineer',
-      'Safety Engineer', 'Contractor', 'Interior Designer', 'WaterProofing Consultant', 'Acoustic Consultants'
-    ],
-    'Non-Technical': [
-      'EarthWork Labour', 'Civil Mason', 'Shuttering/Centring Labour', 'Plumber',
-      'Electrician', 'Painter', 'Carpenter', 'Flooring Labour', 'False Ceiling Worker'
-    ]
+    Technical: ['Architects', 'Civil Engineer', 'Site Supervisor', 'Survey Engineer', 'MEP Consultant', 'Structural Engineer', 'Project Manager', 'HVAC Engineer', 'Safety Engineer', 'Contractor', 'Interior Designer', 'WaterProofing Consultant', 'Acoustic Consultants'],
+    'Non-Technical': ['EarthWork Labour', 'Civil Mason', 'Shuttering/Centring Labour', 'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Flooring Labour', 'False Ceiling Worker']
   };
 
-  // Set initial category based on registration type
+  // Set initial category
   useEffect(() => {
     if (registrationType === 'Product') {
-      setFormData(prev => ({ ...prev, Category: 'Product', Sub_Category: [] }));
+      setFormData(prev => ({ ...prev, Category: selectedProductCategory || 'Product', Sub_Category: [] }));
     } else {
       setFormData(prev => ({ ...prev, Category: selectedServiceType, Sub_Category: [] }));
     }
-  }, [registrationType, selectedServiceType]);
+  }, [registrationType, selectedServiceType, selectedProductCategory]);
 
   const handleServiceTypeClick = (type) => {
     setSelectedServiceType(type);
-    setFormData((prev) => ({ ...prev, Category: type, Sub_Category: [] }));
+    setFormData(prev => ({ ...prev, Category: type, Sub_Category: [] }));
+  };
+
+  const handleProductCategoryClick = (type) => {
+    setSelectedProductCategory(type);
+    setFormData(prev => ({ ...prev, Category: type, Sub_Category: [] }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleLocateMe = () => {
@@ -83,7 +82,7 @@ function Registration() {
         const state = data.address?.state || '';
         const postcode = data.address?.postcode || '';
 
-        setFormData((prev) => ({
+        setFormData(prev => ({
           ...prev,
           Business_address: `${address}, ${city}, ${state} - ${postcode}`,
           Latitude: latitude.toString(),
@@ -116,10 +115,7 @@ function Registration() {
   };
 
   const verifyOtp = async () => {
-    if (!otp) {
-      toast.warning('Please enter the OTP');
-      return;
-    }
+    if (!otp) return toast.warning('Please enter the OTP');
 
     try {
       const response = await axios.post('https://backend-d6mx.vercel.app/verifyotp', {
@@ -138,19 +134,33 @@ function Registration() {
     }
   };
 
-  const uploadImageToCloudinary = async () => {
-    const data = new FormData();
-    data.append('file', imageFile);
-    data.append('upload_preset', 'myupload');
-    data.append('cloud_name', 'dqxsgmf33');
+  // Upload multiple images to Cloudinary and return their URLs
+  const uploadImagesToCloudinary = async () => {
+    const uploadedUrls = [];
+    for (const file of imageFiles) {
+      const data = new FormData();
+      data.append('file', file);
+      data.append('upload_preset', 'myupload');
+      data.append('cloud_name', 'dqxsgmf33');
 
-    const res = await fetch('https://api.cloudinary.com/v1_1/dqxsgmf33/image/upload', {
-      method: 'POST',
-      body: data
-    });
+      try {
+        const res = await fetch('https://api.cloudinary.com/v1_1/dqxsgmf33/image/upload', {
+          method: 'POST',
+          body: data
+        });
 
-    const cloudData = await res.json();
-    return cloudData.secure_url;
+        const cloudData = await res.json();
+        if (cloudData.secure_url) {
+          uploadedUrls.push(cloudData.secure_url);
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (err) {
+        toast.error(`Failed to upload image: ${file.name}`);
+        throw err;
+      }
+    }
+    return uploadedUrls;
   };
 
   const handleSubmit = async (e) => {
@@ -158,13 +168,12 @@ function Registration() {
     if (formData.Password !== confirmPassword) return toast.error('Passwords do not match');
     if (!otpVerified) return toast.error('Please verify your OTP before submitting');
 
-    let imageUrl = '';
-    if (imageFile) {
+    let imageUrls = [];
+    if (imageFiles.length > 0) {
       try {
-        imageUrl = await uploadImageToCloudinary();
+        imageUrls = await uploadImagesToCloudinary();
       } catch (err) {
-        toast.error('Image upload failed');
-        return;
+        return; // error already shown by toast in upload function
       }
     }
 
@@ -172,7 +181,7 @@ function Registration() {
       const res = await fetch('https://backend-d6mx.vercel.app/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, ProductUrl: imageUrl, ID_Type: idType })
+        body: JSON.stringify({ ...formData, ProductUrls: imageUrls, ID_Type: idType })
       });
 
       if (res.ok) {
@@ -199,6 +208,7 @@ function Registration() {
         </h2>
 
         <div className="row g-3">
+          {/* Basic Fields */}
           <div className="col-md-6">
             <label>Business Name</label>
             <input className="form-control" name="Business_Name" value={formData.Business_Name} onChange={handleChange} required />
@@ -233,6 +243,7 @@ function Registration() {
             <button type="button" className="btn btn-outline-secondary w-100" onClick={handleLocateMe}>📍 Locate Me</button>
           </div>
 
+          {/* Service Type Selection */}
           {registrationType === 'Service' && (
             <>
               <div className="col-md-12">
@@ -280,7 +291,27 @@ function Registration() {
             </>
           )}
 
-          
+          {/* Product Type Selection */}
+          {registrationType === 'Product' && (
+            <div className="col-md-12">
+              <div className="row text-center mb-3">
+                <div className="col-md-12">
+                  <h5 className="mb-3">Product Type</h5>
+                </div>
+                {['CIVIL', 'INTERIOR'].map((type, idx) => (
+                  <div className="col-md-6" key={idx}>
+                    <button
+                      type="button"
+                      className={`btn w-100 ${formData.Category === type ? 'btn-dark' : 'btn-outline-secondary'}`}
+                      onClick={() => setFormData(prev => ({ ...prev, Category: type }))}
+                    >
+                      {type}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="col-md-6">
             <label>ID Type</label>
@@ -290,7 +321,7 @@ function Registration() {
             </select>
           </div>
           <div className="col-md-6">
-            <label>Tax ID</label>
+            <label>PAN ID OR AADHAR ID</label>
             <input className="form-control" name="Tax_ID" value={formData.Tax_ID} onChange={handleChange} required />
           </div>
 
@@ -303,11 +334,22 @@ function Registration() {
             <input className="form-control" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
           </div>
 
+          {/* Multi Image Upload */}
           <div className="col-md-12">
-            <label>Upload Image {registrationType === 'Product' ? '(Product Image)' : '(Business Logo/Certificate)'}</label>
-            <input className="form-control" type="file" onChange={(e) => setImageFile(e.target.files[0])} />
+            <label>Upload Images {registrationType === 'Product' ? '(Product Images)' : '(Business Logo/Certificates)'}</label>
+            <input
+              className="form-control"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setImageFiles(Array.from(e.target.files))}
+            />
+            {imageFiles.length > 0 && (
+              <small className="text-muted">{imageFiles.length} file(s) selected</small>
+            )}
           </div>
 
+          {/* Submit */}
           <div className="col-md-12 text-center mt-4">
             <button className="btn btn-dark px-5" type="submit">Register</button>
           </div>
